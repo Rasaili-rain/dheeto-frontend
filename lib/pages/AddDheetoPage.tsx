@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Alert } from "react-native";
 import { X, ChevronLeft } from "lucide-react-native";
-import { CreateDheetoBody } from "../../lib/shared_types/dheeto_types";
-import { createDheeto } from "@/lib/api/dheeto";
+import { createDheeto } from "../api/dheeto";
+import { CreateDheetoBody } from "../shared_types/dheeto_types";
 
 const AddDheetoPage = ({ personId, personName, onBack, onSave }: { personId: string; personName: string; onBack: () => void; onSave: () => void }) => {
   const [dheeto, setDheeto] = useState({

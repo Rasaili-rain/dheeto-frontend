@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Alert, Modal } from "react-native";
 import { X, Trash2, Plus, ChevronLeft, Package, TrendingUp, Clock, CheckCircle, AlertCircle, Edit2 } from "lucide-react-native";
-
-import { Dheeto } from "../../lib/shared_types/db_types";
-import { deleteItem, updateItem, addItem } from "@/lib/api/item";
-import { deleteTransaction, updateTransaction, addTransaction } from "@/lib/api/transaction";
+import { addItem, updateItem, deleteItem } from "../api/item";
+import { addTransaction, updateTransaction, deleteTransaction } from "../api/transaction";
+import { Dheeto } from "../shared_types/db_types";
 
 const DheetoDetailPage = ({ dheeto, onBack, onUpdate }: { dheeto: Dheeto; onBack: () => void; onUpdate: () => void }) => {
   const [editingItem, setEditingItem] = useState<any>(null);

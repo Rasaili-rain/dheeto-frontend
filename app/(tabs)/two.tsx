@@ -1,4 +1,4 @@
-import { Container } from "@/components/container";
+import { Container } from "@/lib/components/container";
 import { ScrollView, Text, View } from "react-native";
 
 export default function TabTwo() {

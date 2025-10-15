@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert, RefreshControl, Modal } from "react-native";
 import { User, Phone, FileText, Trash2, Plus, ChevronLeft, Package, TrendingUp, TrendingDown, ChevronRight, Clock, MoreVertical } from "lucide-react-native";
+import { getAllDheetos } from "../api/dheeto";
 
-import { Dheeto } from "../../lib/shared_types/db_types";
+import { Dheeto } from "../shared_types/db_types";
 import AddDheetoPage from "./AddDheetoPage";
 import DheetoDetailPage from "./DheetoDetailPage";
-import { getAllDheetos } from "@/lib/api/dheeto";
 
 const PersonDetailPage = ({ person, onBack, onDelete }: { person: any; onBack: () => void; onDelete: () => void }) => {
   const [showAddDheeto, setShowAddDheeto] = useState(false);
