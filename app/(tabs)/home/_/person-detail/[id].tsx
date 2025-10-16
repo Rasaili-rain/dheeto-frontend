@@ -1,13 +1,117 @@
+// app/(tabs)/home/person-detail-[id].tsx
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert, RefreshControl, Modal } from "react-native";
-import { User, Phone, FileText, Trash2, Plus, ChevronLeft, Package, TrendingUp, TrendingDown, ChevronRight, Clock, MoreVertical } from "lucide-react-native";
-
-import { Dheeto } from "../../lib/shared_types/db_types";
-import AddDheetoPage from "./AddDheetoPage";
-import DheetoDetailPage from "./DheetoDetailPage";
+import { View, Text, TouchableOpacity, ActivityIndicator, Alert, ScrollView, RefreshControl, Modal } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { fetchPersonById, deletePerson } from "@/lib/api/person";
 import { getAllDheetos } from "@/lib/api/dheeto";
+import { Person } from "@/lib/shared_types/db_types";
+import { Dheeto } from "@/lib/shared_types/db_types";
+import { GetPersonResponse } from "@/lib/shared_types/person_types";
+import Toast, { ToastType } from "@/lib/components/Toast";
+import { User, Phone, FileText, Trash2, Plus, ChevronLeft, Package, TrendingUp, TrendingDown, ChevronRight, Clock, MoreVertical } from "lucide-react-native";
+import AddDheetoPage from "../add-dheeto";
+import DheetoDetailPage from "../dheeto-details";
 
-const PersonDetailPage = ({ person, onBack, onDelete }: { person: any; onBack: () => void; onDelete: () => void }) => {
+const DheetoCard = ({ dheeto, onPress }: { dheeto: Dheeto; onPress: () => void }) => {
+  const totalWeight = dheeto.items.reduce((sum: any, item: { weightInTola: any }) => sum + item.weightInTola, 0);
+  const goldItems = dheeto.items.filter((item: { type: string }) => item.type === "gold").length;
+  const silverItems = dheeto.items.filter((item: { type: string }) => item.type === "silver").length;
+
+  const totalGave = dheeto.transactions.filter((t: { type: string }) => t.type === "gave").reduce((sum: any, t: { amount: any }) => sum + t.amount, 0);
+  const totalReceived = dheeto.transactions.filter((t: { type: string }) => t.type === "received").reduce((sum: any, t: { amount: any }) => sum + t.amount, 0);
+  const balance = totalReceived - totalGave;
+
+  return (
+    <TouchableOpacity onPress={onPress} className="bg-white rounded-xl p-3.5 border border-gray-200 shadow-sm active:scale-[0.98]" activeOpacity={0.7}>
+      {/* Header Row - Compact */}
+      <View className="flex-row items-center justify-between mb-2.5">
+        <View className="flex-1 flex-row items-center gap-2">
+          {dheeto.desc ? (
+            <Text className="text-sm font-bold text-gray-900 flex-1" numberOfLines={1}>
+              {dheeto.desc}
+            </Text>
+          ) : (
+            <Text className="text-sm font-semibold text-gray-400 flex-1">Untitled Dheeto</Text>
+          )}
+          <View className={`px-2 py-0.5 rounded-md ${dheeto.isSettled ? "bg-green-100" : "bg-orange-100"}`}>
+            <Text className={`text-[10px] font-bold ${dheeto.isSettled ? "text-green-700" : "text-orange-700"}`}>{dheeto.isSettled ? "✓ Settled" : "⏱ Active"}</Text>
+          </View>
+        </View>
+        <ChevronRight size={18} color="#9CA3AF" className="ml-2" />
+      </View>
+
+      {/* Date */}
+      <View className="flex-row items-center gap-1 mb-3">
+        <Clock size={10} color="#9CA3AF" />
+        <Text className="text-[10px] text-gray-500">{new Date(dheeto.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</Text>
+      </View>
+
+      {/* Items & Balance Row - Compact */}
+      <View className="flex-row items-center justify-between bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-2.5 mb-2.5">
+        {/* Items */}
+        <View className="flex-row items-center gap-2.5">
+          {goldItems > 0 && (
+            <View className="flex-row items-center gap-1">
+              <View className="bg-yellow-400 w-4 h-4 rounded-full items-center justify-center">
+                <Text className="text-[8px]">GOLD</Text>
+              </View>
+              <Text className="text-xs font-semibold text-gray-700">{goldItems}</Text>
+            </View>
+          )}
+          {silverItems > 0 && (
+            <View className="flex-row items-center gap-1">
+              <View className="bg-gray-300 w-4 h-4 rounded-full items-center justify-center">
+                <Text className="text-[8px]">SILVER</Text>
+              </View>
+              <Text className="text-xs font-semibold text-gray-700">{silverItems}</Text>
+            </View>
+          )}
+          {(goldItems > 0 || silverItems > 0) && <View className="h-3 w-px bg-gray-300" />}
+          <Text className="text-xs text-gray-600">
+            <Text className="font-bold text-gray-800">{totalWeight.toFixed(1)}</Text>
+            <Text className="text-[10px]"> tola</Text>
+          </Text>
+        </View>
+
+        {/* Balance - Prominent */}
+        <View className="items-end">
+          <Text className="text-[9px] text-gray-500 uppercase tracking-wide mb-0.5">Balance</Text>
+          <Text className={`text-base font-extrabold ${balance >= 0 ? "text-green-600" : "text-red-600"}`}>
+            {balance >= 0 ? "+" : "-"}₹{Math.abs(balance).toLocaleString()}
+          </Text>
+        </View>
+      </View>
+
+      {/* Transactions Footer - Minimal */}
+      {(totalGave > 0 || totalReceived > 0) && (
+        <View className="flex-row items-center justify-between pt-2 border-t border-gray-100">
+          <View className="flex-row items-center gap-3">
+            {totalGave > 0 && (
+              <View className="flex-row items-center gap-1">
+                <View className="bg-red-100 px-1.5 py-0.5 rounded">
+                  <Text className="text-[9px] font-bold text-red-700">DOWN</Text>
+                </View>
+                <Text className="text-xs text-gray-600">₹{totalGave.toLocaleString()}</Text>
+              </View>
+            )}
+            {totalReceived > 0 && (
+              <View className="flex-row items-center gap-1">
+                <View className="bg-green-100 px-1.5 py-0.5 rounded">
+                  <Text className="text-[9px] font-bold text-green-700">UP</Text>
+                </View>
+                <Text className="text-xs text-gray-600">₹{totalReceived.toLocaleString()}</Text>
+              </View>
+            )}
+          </View>
+          <Text className="text-[10px] text-gray-400">{dheeto.transactions.length} txn</Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  );
+};
+
+// Main PersonDetailPage
+const PersonDetailPage = ({ person, onBack, onDelete }: { person: Person; onBack: () => void; onDelete: () => void }) => {
   const [showAddDheeto, setShowAddDheeto] = useState(false);
   const [selectedDheeto, setSelectedDheeto] = useState<Dheeto | null>(null);
   const [dheetos, setDheetos] = useState<Dheeto[]>([]);
@@ -208,102 +312,93 @@ const PersonDetailPage = ({ person, onBack, onDelete }: { person: any; onBack: (
   );
 };
 
-const DheetoCard = ({ dheeto, onPress }: { dheeto: Dheeto; onPress: () => void }) => {
-  const totalWeight = dheeto.items.reduce((sum: any, item: { weightInTola: any }) => sum + item.weightInTola, 0);
-  const goldItems = dheeto.items.filter((item: { type: string }) => item.type === "gold").length;
-  const silverItems = dheeto.items.filter((item: { type: string }) => item.type === "silver").length;
+// Export the route wrapper
+export default function PersonDetailRoute() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
 
-  const totalGave = dheeto.transactions.filter((t: { type: string }) => t.type === "gave").reduce((sum: any, t: { amount: any }) => sum + t.amount, 0);
-  const totalReceived = dheeto.transactions.filter((t: { type: string }) => t.type === "received").reduce((sum: any, t: { amount: any }) => sum + t.amount, 0);
-  const balance = totalReceived - totalGave;
+  const [person, setPerson] = useState<Person | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState<{
+    show: boolean;
+    message: string;
+    type: ToastType;
+  }>({ show: false, message: "", type: "success" });
+
+  // toast helper
+  const displayToast = (msg: string, type: ToastType = "success") => {
+    setToast({ show: true, message: msg, type });
+    setTimeout(() => setToast((p) => ({ ...p, show: false })), 3000);
+  };
+
+  // load person
+  const loadPerson = async () => {
+    if (!id) return;
+    setLoading(true);
+    try {
+      const res = (await fetchPersonById(id)) as GetPersonResponse;
+      if (!res.success) throw new Error(res.message);
+      setPerson(res.data);
+    } catch (e: any) {
+      displayToast(e.message ?? "Failed", "error");
+      router.back();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // delete handler
+  const handleDelete = async () => {
+    if (!person) return;
+    Alert.alert("Delete Person", `Delete ${person.name}?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          setLoading(true);
+          try {
+            await deletePerson(person._id);
+            displayToast("Deleted", "success");
+            router.back(); // go back to list (still inside tab)
+          } catch (e: any) {
+            displayToast(e.message ?? "Delete failed", "error");
+          } finally {
+            setLoading(false);
+          }
+        },
+      },
+    ]);
+  };
+
+  useEffect(() => {
+    loadPerson();
+  }, [id]);
+
+  /* ---------- UI ---------- */
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-slate-50">
+        <ActivityIndicator size="large" color="#4F46E5" />
+      </View>
+    );
+  }
+
+  if (!person) {
+    return (
+      <View className="flex-1 justify-center items-center bg-slate-50">
+        <Text className="text-gray-500 mb-4">Person not found</Text>
+        <TouchableOpacity onPress={() => router.back()} className="bg-indigo-600 px-6 py-3 rounded-xl">
+          <Text className="text-white font-bold">Back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
-    <TouchableOpacity onPress={onPress} className="bg-white rounded-xl p-3.5 border border-gray-200 shadow-sm active:scale-[0.98]" activeOpacity={0.7}>
-      {/* Header Row - Compact */}
-      <View className="flex-row items-center justify-between mb-2.5">
-        <View className="flex-1 flex-row items-center gap-2">
-          {dheeto.desc ? (
-            <Text className="text-sm font-bold text-gray-900 flex-1" numberOfLines={1}>
-              {dheeto.desc}
-            </Text>
-          ) : (
-            <Text className="text-sm font-semibold text-gray-400 flex-1">Untitled Dheeto</Text>
-          )}
-          <View className={`px-2 py-0.5 rounded-md ${dheeto.isSettled ? "bg-green-100" : "bg-orange-100"}`}>
-            <Text className={`text-[10px] font-bold ${dheeto.isSettled ? "text-green-700" : "text-orange-700"}`}>{dheeto.isSettled ? "✓ Settled" : "⏱ Active"}</Text>
-          </View>
-        </View>
-        <ChevronRight size={18} color="#9CA3AF" className="ml-2" />
-      </View>
-
-      {/* Date */}
-      <View className="flex-row items-center gap-1 mb-3">
-        <Clock size={10} color="#9CA3AF" />
-        <Text className="text-[10px] text-gray-500">{new Date(dheeto.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</Text>
-      </View>
-
-      {/* Items & Balance Row - Compact */}
-      <View className="flex-row items-center justify-between bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-2.5 mb-2.5">
-        {/* Items */}
-        <View className="flex-row items-center gap-2.5">
-          {goldItems > 0 && (
-            <View className="flex-row items-center gap-1">
-              <View className="bg-yellow-400 w-4 h-4 rounded-full items-center justify-center">
-                <Text className="text-[8px]">🟡</Text>
-              </View>
-              <Text className="text-xs font-semibold text-gray-700">{goldItems}</Text>
-            </View>
-          )}
-          {silverItems > 0 && (
-            <View className="flex-row items-center gap-1">
-              <View className="bg-gray-300 w-4 h-4 rounded-full items-center justify-center">
-                <Text className="text-[8px]">⚪</Text>
-              </View>
-              <Text className="text-xs font-semibold text-gray-700">{silverItems}</Text>
-            </View>
-          )}
-          {(goldItems > 0 || silverItems > 0) && <View className="h-3 w-px bg-gray-300" />}
-          <Text className="text-xs text-gray-600">
-            <Text className="font-bold text-gray-800">{totalWeight.toFixed(1)}</Text>
-            <Text className="text-[10px]"> tola</Text>
-          </Text>
-        </View>
-
-        {/* Balance - Prominent */}
-        <View className="items-end">
-          <Text className="text-[9px] text-gray-500 uppercase tracking-wide mb-0.5">Balance</Text>
-          <Text className={`text-base font-extrabold ${balance >= 0 ? "text-green-600" : "text-red-600"}`}>
-            {balance >= 0 ? "+" : "-"}₹{Math.abs(balance).toLocaleString()}
-          </Text>
-        </View>
-      </View>
-
-      {/* Transactions Footer - Minimal */}
-      {(totalGave > 0 || totalReceived > 0) && (
-        <View className="flex-row items-center justify-between pt-2 border-t border-gray-100">
-          <View className="flex-row items-center gap-3">
-            {totalGave > 0 && (
-              <View className="flex-row items-center gap-1">
-                <View className="bg-red-100 px-1.5 py-0.5 rounded">
-                  <Text className="text-[9px] font-bold text-red-700">↓</Text>
-                </View>
-                <Text className="text-xs text-gray-600">₹{totalGave.toLocaleString()}</Text>
-              </View>
-            )}
-            {totalReceived > 0 && (
-              <View className="flex-row items-center gap-1">
-                <View className="bg-green-100 px-1.5 py-0.5 rounded">
-                  <Text className="text-[9px] font-bold text-green-700">↑</Text>
-                </View>
-                <Text className="text-xs text-gray-600">₹{totalReceived.toLocaleString()}</Text>
-              </View>
-            )}
-          </View>
-          <Text className="text-[10px] text-gray-400">{dheeto.transactions.length} txn</Text>
-        </View>
-      )}
-    </TouchableOpacity>
+    <>
+      <PersonDetailPage person={person} onBack={() => router.back()} onDelete={handleDelete} />
+      {toast.show && <Toast toast={toast} />}
+    </>
   );
-};
-
-export default PersonDetailPage;
+}

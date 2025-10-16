@@ -1,3 +1,4 @@
+// app/(tabs)/home/index.tsx
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, RefreshControl } from "react-native";
 import { User, Plus, Filter } from "lucide-react-native";
@@ -13,6 +14,12 @@ import Toast, { ToastType } from "@/lib/components/Toast";
 
 export default function PersonListPage() {
   const router = useRouter();
+  const goToAdd = () => router.push("/add-person");
+  const goToDetail = (id: string) =>
+    router.push({
+      pathname: "/home/_/person-detail/[id]",
+      params: { id },
+    });
   const [persons, setPersons] = useState<Person[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -112,7 +119,7 @@ export default function PersonListPage() {
             <TouchableOpacity onPress={() => setShowSearch(true)} className="p-3 bg-white border border-gray-300 rounded-xl shadow-md">
               <Filter size={22} color="#6366F1" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push("/add-person")} className="flex-row items-center gap-2 bg-indigo-600 px-5 py-3 rounded-xl shadow-lg">
+            <TouchableOpacity onPress={() => goToAdd()} className="flex-row items-center gap-2 bg-indigo-600 px-5 py-3 rounded-xl shadow-lg">
               <Plus size={22} color="#FFFFFF" />
               <Text className="text-white font-bold text-base">Add</Text>
             </TouchableOpacity>
@@ -147,7 +154,7 @@ export default function PersonListPage() {
             ) : (
               <View className="space-y-3">
                 {persons.map((person) => (
-                  <PersonCard key={person._id} person={person} onPress={() => router.push(`/person-detail/${person._id}`)} />
+                  <PersonCard key={person._id} person={person} onPress={() => goToDetail(person._id)} />
                 ))}
               </View>
             )}

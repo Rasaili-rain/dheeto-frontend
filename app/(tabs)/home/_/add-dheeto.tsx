@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Alert } from "react-native";
 import { X, ChevronLeft } from "lucide-react-native";
-import { CreateDheetoBody } from "../../lib/shared_types/dheeto_types";
+import { useRouter } from "expo-router";
 import { createDheeto } from "@/lib/api/dheeto";
+import { CreateDheetoBody } from "@/lib/shared_types/dheeto_types";
 
-const AddDheetoPage = ({ personId, personName, onBack, onSave }: { personId: string; personName: string; onBack: () => void; onSave: () => void }) => {
+const AddDheetoPage = ({ personId, personName, onSave }: { personId: string; personName: string; onBack: () => void; onSave: () => void }) => {
+  const router = useRouter();
+
   const [dheeto, setDheeto] = useState({
     items: [] as any[],
     transactions: [] as any[],
@@ -112,7 +115,7 @@ const AddDheetoPage = ({ personId, personName, onBack, onSave }: { personId: str
       {/* Header */}
       <View className="bg-white border-b border-gray-200 px-4 pt-12 pb-4 shadow-sm">
         <View className="flex-row items-center justify-between mb-2">
-          <TouchableOpacity onPress={onBack} className="p-2 -ml-2 active:bg-gray-100 rounded-full" activeOpacity={0.7} disabled={saving}>
+          <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2 active:bg-gray-100 rounded-full" activeOpacity={0.7} disabled={saving}>
             <ChevronLeft size={24} color="#374151" />
           </TouchableOpacity>
           <Text className="text-lg font-semibold text-gray-800">New Dheeto</Text>

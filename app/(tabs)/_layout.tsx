@@ -1,5 +1,6 @@
-import { TabBarIcon } from "@/lib/components/tabbar-icon";
+// app/(tabs)/_layout.tsx
 import { Tabs } from "expo-router";
+import { TabBarIcon } from "@/lib/components/tabbar-icon";
 
 export default function TabLayout() {
   return (
@@ -14,17 +15,10 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="home"
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="two"
-        options={{
-          title: "Explore",
-          tabBarIcon: ({ color }) => <TabBarIcon name="compass" color={color} />,
         }}
       />
     </Tabs>

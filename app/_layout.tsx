@@ -1,3 +1,4 @@
+// app/_layout.tsx
 import { Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "../global.css";
@@ -17,24 +18,8 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <Stack>
+      <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="add-person"
-          options={{
-            title: "Add Person",
-            presentation: "modal",
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="person-detail/[id]"
-          options={{
-            title: "Person Details",
-            presentation: "modal",
-            headerShown: false,
-          }}
-        />
       </Stack>
     </GestureHandlerRootView>
   );

@@ -1,13 +1,15 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
-import { User, Phone, X, Plus } from "lucide-react-native";
+// app/add-person/index.tsx
+import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, TextInput } from "react-native";
 import { useRouter } from "expo-router";
+import { Phone, Plus, User, X } from "lucide-react-native";
 import { createPerson } from "@/lib/api/person";
-import { CreatePersonBody } from "@/lib/shared_types/person_types";
 import Toast, { ToastType } from "@/lib/components/Toast";
+import { CreatePersonBody } from "@/lib/shared_types/person_types";
+import { useState } from "react";
 
-export default function AddPersonPage() {
+export default function AddPersonModal() {
   const router = useRouter();
+
   const [formData, setFormData] = useState<CreatePersonBody>({ name: "", phoneNo: "", desc: "" });
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ show: boolean; message: string; type: ToastType }>({
