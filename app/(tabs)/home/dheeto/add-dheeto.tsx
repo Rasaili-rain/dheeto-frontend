@@ -1,11 +1,13 @@
+// app/(tabs)/home/dheeto/add-dheeto.tsx
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Alert } from "react-native";
 import { X, ChevronLeft } from "lucide-react-native";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { createDheeto } from "@/lib/api/dheeto";
 import { CreateDheetoBody } from "@/lib/shared_types/dheeto_types";
 
-const AddDheetoPage = ({ personId, personName, onSave }: { personId: string; personName: string; onBack: () => void; onSave: () => void }) => {
+export default function AddDheetoPage() {
+  const { personId, personName } = useLocalSearchParams<{ personId: string; personName: string }>();
   const router = useRouter();
 
   const [dheeto, setDheeto] = useState({
@@ -84,6 +86,11 @@ const AddDheetoPage = ({ personId, personName, onSave }: { personId: string; per
       return;
     }
 
+    if (!personId) {
+      Alert.alert("Error", "Person ID is missing");
+      return;
+    }
+
     try {
       setSaving(true);
 
@@ -97,8 +104,12 @@ const AddDheetoPage = ({ personId, personName, onSave }: { personId: string; per
       const response = await createDheeto(dheetoData);
 
       if (response.success) {
-        Alert.alert("Success", "Dheeto created successfully");
-        onSave();
+        Alert.alert("Success", "Dheeto created successfully", [
+          {
+            text: "OK",
+            onPress: () => router.back(),
+          },
+        ]);
       } else {
         Alert.alert("Error", response.message || "Failed to create dheeto");
       }
@@ -388,6 +399,4 @@ const AddDheetoPage = ({ personId, personName, onSave }: { personId: string; per
       </ScrollView>
     </View>
   );
-};
-
-export default AddDheetoPage;
+}

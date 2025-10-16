@@ -1,24 +1,49 @@
+// app/(tabs)/home/dheeto/[id].tsx
 import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Alert, Modal } from "react-native";
 import { X, Trash2, Plus, ChevronLeft, Package, TrendingUp, Clock, CheckCircle, AlertCircle, Edit2 } from "lucide-react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useState, useEffect } from "react";
 
 import { deleteItem, updateItem, addItem } from "@/lib/api/item";
 import { deleteTransaction, updateTransaction, addTransaction } from "@/lib/api/transaction";
+import { getDheetoById } from "@/lib/api/dheeto";
 import { Dheeto } from "@/lib/shared_types/db_types";
-import { useState } from "react";
 
-const DheetoDetailPage = ({ dheeto, onBack, onUpdate }: { dheeto: Dheeto; onBack: () => void; onUpdate: () => void }) => {
+export default function DheetoDetailPage() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
+
+  const [dheeto, setDheeto] = useState<Dheeto | null>(null);
+  const [loading, setLoading] = useState(true);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [editingTransaction, setEditingTransaction] = useState<any>(null);
   const [showAddItem, setShowAddItem] = useState(false);
   const [showAddTransaction, setShowAddTransaction] = useState(false);
-  const [loading, setLoading] = useState(false);
 
-  const totalWeight = dheeto.items.reduce((sum, item) => sum + item.weightInTola, 0);
-  const totalGave = dheeto.transactions.filter((t) => t.type === "gave").reduce((sum, t) => sum + t.amount, 0);
-  const totalReceived = dheeto.transactions.filter((t) => t.type === "received").reduce((sum, t) => sum + t.amount, 0);
-  const balance = totalReceived - totalGave;
+  const loadDheeto = async () => {
+    if (!id) return;
+    try {
+      setLoading(true);
+      const response = await getDheetoById(id);
+      if (response.success && response.data) {
+        setDheeto(response.data);
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to load dheeto");
+      router.back();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDheeto();
+  }, [id]);
+
+  const handleUpdate = () => loadDheeto();
 
   const handleDeleteItem = async (itemId: string) => {
+    if (!dheeto) return;
     Alert.alert("Delete Item", "Are you sure you want to delete this item?", [
       { text: "Cancel", style: "cancel" },
       {
@@ -30,7 +55,7 @@ const DheetoDetailPage = ({ dheeto, onBack, onUpdate }: { dheeto: Dheeto; onBack
             const response = await deleteItem(dheeto._id, itemId);
             if (response.success) {
               Alert.alert("Success", "Item deleted successfully");
-              onUpdate();
+              handleUpdate();
             }
           } catch (error) {
             Alert.alert("Error", "Failed to delete item");
@@ -43,6 +68,7 @@ const DheetoDetailPage = ({ dheeto, onBack, onUpdate }: { dheeto: Dheeto; onBack
   };
 
   const handleDeleteTransaction = async (transactionId: string) => {
+    if (!dheeto) return;
     Alert.alert("Delete Transaction", "Are you sure you want to delete this transaction?", [
       { text: "Cancel", style: "cancel" },
       {
@@ -54,7 +80,7 @@ const DheetoDetailPage = ({ dheeto, onBack, onUpdate }: { dheeto: Dheeto; onBack
             const response = await deleteTransaction(dheeto._id, transactionId);
             if (response.success) {
               Alert.alert("Success", "Transaction deleted successfully");
-              onUpdate();
+              handleUpdate();
             }
           } catch (error) {
             Alert.alert("Error", "Failed to delete transaction");
@@ -66,11 +92,24 @@ const DheetoDetailPage = ({ dheeto, onBack, onUpdate }: { dheeto: Dheeto; onBack
     ]);
   };
 
+  if (loading || !dheeto) {
+    return (
+      <View className="flex-1 justify-center items-center bg-gray-50">
+        <ActivityIndicator size="large" color="#2563EB" />
+      </View>
+    );
+  }
+
+  const totalWeight = dheeto.items.reduce((sum, item) => sum + item.weightInTola, 0);
+  const totalGave = dheeto.transactions.filter((t) => t.type === "gave").reduce((sum, t) => sum + t.amount, 0);
+  const totalReceived = dheeto.transactions.filter((t) => t.type === "received").reduce((sum, t) => sum + t.amount, 0);
+  const balance = totalReceived - totalGave;
+
   return (
     <View className="flex-1 bg-gray-50">
       <View className="bg-white border-b border-gray-200 px-4 pt-12 pb-4 shadow-sm">
         <View className="flex-row items-center justify-between mb-2">
-          <TouchableOpacity onPress={onBack} className="p-2 -ml-2 active:bg-gray-100 rounded-full" activeOpacity={0.7}>
+          <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2 active:bg-gray-100 rounded-full" activeOpacity={0.7}>
             <ChevronLeft size={24} color="#374151" />
           </TouchableOpacity>
           <Text className="text-lg font-semibold text-gray-800">Dheeto Details</Text>
@@ -244,10 +283,10 @@ const DheetoDetailPage = ({ dheeto, onBack, onUpdate }: { dheeto: Dheeto; onBack
         </View>
       </ScrollView>
 
-      {editingItem && <EditItemModal item={editingItem} dheetoId={dheeto._id} onClose={() => setEditingItem(null)} onUpdate={onUpdate} />}
-      {editingTransaction && <EditTransactionModal transaction={editingTransaction} dheetoId={dheeto._id} onClose={() => setEditingTransaction(null)} onUpdate={onUpdate} />}
-      {showAddItem && <AddItemModal dheetoId={dheeto._id} onClose={() => setShowAddItem(false)} onUpdate={onUpdate} />}
-      {showAddTransaction && <AddTransactionModal dheetoId={dheeto._id} onClose={() => setShowAddTransaction(false)} onUpdate={onUpdate} />}
+      {editingItem && <EditItemModal item={editingItem} dheetoId={dheeto._id} onClose={() => setEditingItem(null)} onUpdate={handleUpdate} />}
+      {editingTransaction && <EditTransactionModal transaction={editingTransaction} dheetoId={dheeto._id} onClose={() => setEditingTransaction(null)} onUpdate={handleUpdate} />}
+      {showAddItem && <AddItemModal dheetoId={dheeto._id} onClose={() => setShowAddItem(false)} onUpdate={handleUpdate} />}
+      {showAddTransaction && <AddTransactionModal dheetoId={dheeto._id} onClose={() => setShowAddTransaction(false)} onUpdate={handleUpdate} />}
 
       {loading && (
         <View className="absolute inset-0 bg-black/20 items-center justify-center">
@@ -256,9 +295,7 @@ const DheetoDetailPage = ({ dheeto, onBack, onUpdate }: { dheeto: Dheeto; onBack
       )}
     </View>
   );
-};
-
-export default DheetoDetailPage;
+}
 
 const EditItemModal = ({ item, dheetoId, onClose, onUpdate }: any) => {
   const [formData, setFormData] = useState({
@@ -578,6 +615,7 @@ const AddTransactionModal = ({ dheetoId, onClose, onUpdate }: any) => {
       });
       if (response.success) {
         Alert.alert("Success", "Transaction added successfully");
+        onClose();
         onUpdate();
       }
     } catch (error) {
