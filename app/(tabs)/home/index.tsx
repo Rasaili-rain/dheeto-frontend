@@ -15,7 +15,7 @@ import Toast, { ToastType } from "@/lib/components/Toast";
 export default function PersonListPage() {
   const router = useRouter();
   const goToAddPersonPage = () => router.push("/home/person/add-person");
-  const goToPersonDetailsPage = (id: string) => router.push({ pathname: "/home/person/[id]", params: { id } });
+  const goToPersonDetailsPage = (personId: string) => router.push(`/home/person/${personId}`);
   const [persons, setPersons] = useState<Person[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);

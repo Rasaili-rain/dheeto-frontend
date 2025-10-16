@@ -111,6 +111,10 @@ export default function PersonDetailRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
 
+  const goToIndividualDheetoPage = (dheetoId: string) => router.push(`/home/person/dheeto/${dheetoId}`);
+  const goToAddDheetoPage = (personId: string, personName: string) =>
+    router.push(`/home/person/dheeto/add-dheeto?personId=${personId}&personName=${encodeURIComponent(personName)}`);
+
   const [person, setPerson] = useState<Person | null>(null);
   const [dheetos, setDheetos] = useState<Dheeto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -306,7 +310,7 @@ export default function PersonDetailRoute() {
           {dheetos.length > 0 && (
             <View className="mx-4 space-y-3">
               {dheetos.map((dheeto) => (
-                <DheetoCard key={dheeto._id} dheeto={dheeto} onPress={() => router.push(`/home/dheeto/${dheeto._id}`)} />
+                <DheetoCard key={dheeto._id} dheeto={dheeto} onPress={() => goToIndividualDheetoPage(dheeto._id)} />
               ))}
             </View>
           )}
@@ -314,7 +318,7 @@ export default function PersonDetailRoute() {
           {/* Add Button */}
           <View className="mx-4 mt-4 mb-8">
             <TouchableOpacity
-              onPress={() => router.push(`/home/dheeto/add-dheeto?personId=${person._id}&personName=${encodeURIComponent(person.name)}`)}
+              onPress={() => goToAddDheetoPage(person._id, person.name)}
               className="bg-blue-600 rounded-2xl p-5 flex-row items-center justify-center shadow-sm active:bg-blue-700"
               activeOpacity={0.8}
             >

@@ -17,7 +17,7 @@
         "expo-crypto": "~15.0.6",
         "expo-linking": "~8.0.7",
         "expo-navigation-bar": "~5.0.8",
-        "expo-router": "~6.0.0",
+        "expo-router": "~6.0.12",
         "expo-secure-store": "~15.0.6",
         "expo-splash-screen": "~31.0.8",
         "expo-status-bar": "~3.0.7",
@@ -38,7 +38,7 @@
         "@babel/core": "^7.26.10",
         "@types/react": "~19.1.10",
         "tailwindcss": "^3.4.17",
-        "typescript": "~5.8.2",
+        "typescript": "~5.9.2",
       },
     },
   },
@@ -1375,7 +1375,7 @@
 
     "type-fest": ["type-fest@0.7.1", "", {}, "sha512-Ne2YiiGN8bmrmJJEuTWTLJR32nh/JdL1+PSicowtNb0WFpn59GK8/lfD61bVtzguz7b3PBt74nxpv/Pw5po5Rg=="],
 
-    "typescript": ["typescript@5.8.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ=="],
+    "typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
     "ua-parser-js": ["ua-parser-js@1.0.41", "", { "bin": { "ua-parser-js": "script/cli.js" } }, "sha512-LbBDqdIC5s8iROCUjMbW1f5dJQTEFB1+KO9ogbvlb3nm9n4YHa5p4KTvFPWvh2Hs8gZMBuiB1/8+pdfe/tDPug=="],
 
