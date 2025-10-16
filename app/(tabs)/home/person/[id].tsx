@@ -1,4 +1,4 @@
-// app/(tabs)/home/person-detail-[id].tsx
+// app/(tabs)/home/_/person-detail/[id].tsx
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ActivityIndicator, Alert, ScrollView, RefreshControl, Modal } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -9,8 +9,8 @@ import { Dheeto } from "@/lib/shared_types/db_types";
 import { GetPersonResponse } from "@/lib/shared_types/person_types";
 import Toast, { ToastType } from "@/lib/components/Toast";
 import { User, Phone, FileText, Trash2, Plus, ChevronLeft, Package, TrendingUp, TrendingDown, ChevronRight, Clock, MoreVertical } from "lucide-react-native";
-import AddDheetoPage from "../add-dheeto";
-import DheetoDetailPage from "../dheeto-details";
+import AddDheetoPage from "../dheeto/add-dheeto";
+import DheetoDetailPage from "../dheeto/dheeto-details";
 
 const DheetoCard = ({ dheeto, onPress }: { dheeto: Dheeto; onPress: () => void }) => {
   const totalWeight = dheeto.items.reduce((sum: any, item: { weightInTola: any }) => sum + item.weightInTola, 0);

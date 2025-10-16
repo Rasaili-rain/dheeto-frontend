@@ -31,7 +31,6 @@ const DheetoDetailPage = ({ dheeto, onBack, onUpdate }: { dheeto: Dheeto; onBack
             if (response.success) {
               Alert.alert("Success", "Item deleted successfully");
               onUpdate();
-              onBack();
             }
           } catch (error) {
             Alert.alert("Error", "Failed to delete item");
@@ -56,7 +55,6 @@ const DheetoDetailPage = ({ dheeto, onBack, onUpdate }: { dheeto: Dheeto; onBack
             if (response.success) {
               Alert.alert("Success", "Transaction deleted successfully");
               onUpdate();
-              onBack();
             }
           } catch (error) {
             Alert.alert("Error", "Failed to delete transaction");
@@ -246,48 +244,10 @@ const DheetoDetailPage = ({ dheeto, onBack, onUpdate }: { dheeto: Dheeto; onBack
         </View>
       </ScrollView>
 
-      {editingItem && (
-        <EditItemModal
-          item={editingItem}
-          dheetoId={dheeto._id}
-          onClose={() => setEditingItem(null)}
-          onUpdate={() => {
-            onUpdate();
-            onBack();
-          }}
-        />
-      )}
-      {editingTransaction && (
-        <EditTransactionModal
-          transaction={editingTransaction}
-          dheetoId={dheeto._id}
-          onClose={() => setEditingTransaction(null)}
-          onUpdate={() => {
-            onUpdate();
-            onBack();
-          }}
-        />
-      )}
-      {showAddItem && (
-        <AddItemModal
-          dheetoId={dheeto._id}
-          onClose={() => setShowAddItem(false)}
-          onUpdate={() => {
-            onUpdate();
-            onBack();
-          }}
-        />
-      )}
-      {showAddTransaction && (
-        <AddTransactionModal
-          dheetoId={dheeto._id}
-          onClose={() => setShowAddTransaction(false)}
-          onUpdate={() => {
-            onUpdate();
-            onBack();
-          }}
-        />
-      )}
+      {editingItem && <EditItemModal item={editingItem} dheetoId={dheeto._id} onClose={() => setEditingItem(null)} onUpdate={onUpdate} />}
+      {editingTransaction && <EditTransactionModal transaction={editingTransaction} dheetoId={dheeto._id} onClose={() => setEditingTransaction(null)} onUpdate={onUpdate} />}
+      {showAddItem && <AddItemModal dheetoId={dheeto._id} onClose={() => setShowAddItem(false)} onUpdate={onUpdate} />}
+      {showAddTransaction && <AddTransactionModal dheetoId={dheeto._id} onClose={() => setShowAddTransaction(false)} onUpdate={onUpdate} />}
 
       {loading && (
         <View className="absolute inset-0 bg-black/20 items-center justify-center">
@@ -322,6 +282,7 @@ const EditItemModal = ({ item, dheetoId, onClose, onUpdate }: any) => {
       });
       if (response.success) {
         Alert.alert("Success", "Item updated successfully");
+        onClose();
         onUpdate();
       }
     } catch (error) {
@@ -423,6 +384,7 @@ const EditTransactionModal = ({ transaction, dheetoId, onClose, onUpdate }: any)
       });
       if (response.success) {
         Alert.alert("Success", "Transaction updated successfully");
+        onClose();
         onUpdate();
       }
     } catch (error) {
@@ -509,6 +471,7 @@ const AddItemModal = ({ dheetoId, onClose, onUpdate }: any) => {
       });
       if (response.success) {
         Alert.alert("Success", "Item added successfully");
+        onClose();
         onUpdate();
       }
     } catch (error) {

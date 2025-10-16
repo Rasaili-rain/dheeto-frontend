@@ -17,7 +17,7 @@ export const createDheeto = async (data: CreateDheetoBody): Promise<AddDheetoRes
   return res.data;
 };
 
-export const getDheeto = async (id: string): Promise<GetDheetoResponse> => {
+export const getDheetoById = async (id: string): Promise<GetDheetoResponse> => {
   const res = await api.get(`/dheeto/${id}`);
   return res.data;
 };
