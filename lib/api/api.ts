@@ -1,8 +1,7 @@
 import axios, { AxiosInstance } from "axios";
-const SERVER_IP = "http://192.168.254.243:3000";
 
 export const api: AxiosInstance = axios.create({
-  baseURL: SERVER_IP,
+  baseURL: process.env.EXPO_PUBLIC_SERVER_IP,
   headers: { "Content-Type": "application/json" },
   timeout: 5000,
 });
