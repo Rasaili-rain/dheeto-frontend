@@ -7,6 +7,8 @@ export interface Person {
   createdAt: Date;
   dheetos: Dheeto[];
   totalBalance: number;
+  totalGold: number;
+  totalSilver: number;
   unsettledDheetosCount: number;
 }
 
@@ -15,9 +17,10 @@ export interface Dheeto {
   items: Item[];
   transactions: Transaction[];
   isSettled: boolean;
-  desc?: string;
+  dheetoBalance: number;
   createdAt: Date;
   updatedAt: Date;
+  desc?: string;
 }
 
 export interface Item {
