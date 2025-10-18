@@ -1,5 +1,5 @@
 import { Dheeto, Item, Transaction } from "./db_types";
-import { ErrorResponse, PaginatedResponse, SuccessMessageResponse, SuccessResponse } from "./types";
+import { SuccessResponse, ErrorResponse, SuccessMessageResponse, PaginatedResponse } from "./types";
 
 export interface CreateDheetoBody {
   personId: string;
@@ -19,7 +19,7 @@ export interface DheetoIdParams {
 
 export interface GetAllDheetosQuery {
   personId?: string;
-  isSettled?: "true" | "false";
+  isSettled?: "true" | "false" | "all";
   page?: string;
   limit?: string;
   sortBy?: "createdAt" | "updatedAt";
@@ -28,7 +28,7 @@ export interface GetAllDheetosQuery {
 
 export interface SearchDheetosQuery {
   personId?: string;
-  isSettled?: "true" | "false";
+  isSettled?: "true" | "false" | "all";
   createdAfter?: string;
   createdBefore?: string;
   desc?: string;
@@ -42,3 +42,4 @@ export type GetDheetoResponse = SuccessResponse<Dheeto> | ErrorResponse;
 export type DeleteDheetoResponse = SuccessMessageResponse | ErrorResponse;
 export type GetAllDheetosResponse = PaginatedResponse<Dheeto> | ErrorResponse;
 export type SearchDheetosResponse = PaginatedResponse<Dheeto> | ErrorResponse;
+export type SettleDheetoResponse = (SuccessResponse<Dheeto> & { message: string }) | ErrorResponse;

@@ -1,5 +1,5 @@
 import { Person } from "./db_types";
-import { ErrorResponse, PaginatedResponse, SuccessMessageResponse, SuccessResponse } from "./types";
+import { SuccessResponse, ErrorResponse, SuccessMessageResponse, PaginatedResponse } from "./types";
 
 export interface CreatePersonBody {
   name: string;
