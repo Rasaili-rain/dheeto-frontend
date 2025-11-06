@@ -1,4 +1,4 @@
-import { AddItemBody, AddItemResponse, UpdateItemBody, UpdateItemResponse, DeleteItemResponse, SettleItemBody, SettleItemResponse } from "../shared_types/item_types";
+import { AddItemBody, AddItemResponse, UpdateItemBody, UpdateItemResponse, DeleteItemResponse } from "../shared_types/item_types";
 import { api } from "./api";
 
 export const addItem = async (dheetoId: string, data: AddItemBody): Promise<AddItemResponse> => {
@@ -13,10 +13,5 @@ export const updateItem = async (dheetoId: string, itemId: string, data: UpdateI
 
 export const deleteItem = async (dheetoId: string, itemId: string): Promise<DeleteItemResponse> => {
   const response = await api.delete(`/dheeto/${dheetoId}/item/${itemId}`);
-  return response.data;
-};
-
-export const settleItem = async (dheetoId: string, itemId: string, data: SettleItemBody): Promise<SettleItemResponse> => {
-  const response = await api.put(`/dheeto/${dheetoId}/item/${itemId}/settle`, data);
   return response.data;
 };

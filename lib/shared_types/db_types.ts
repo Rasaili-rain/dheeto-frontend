@@ -30,6 +30,7 @@ export interface Item {
   purity: number;
   weightInTola: number;
   desc?: string;
+  isSettled :boolean;
   settledAt: Date | null;
   createdAt: Date;
 }

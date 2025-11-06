@@ -94,7 +94,7 @@ export default function DheetoDetailPage() {
                 <View key={item._id} className={`rounded-lg p-4 border ${item.type === "gold" ? "bg-amber-50 border-amber-800" : "bg-gray-100 border-amber-800"}`}>
                   <View className="flex-row items-start justify-between mb-3">
                     <View className="flex-1 pr-3">
-                      <Text className="font-semibold text-gray-900 text-base mb-1">{item.name}</Text>
+                      <Text className="font-semibold text-gray-900 text-base mb-1">{item.name} </Text>
                       {item.desc && <Text className="text-sm text-gray-600 mb-2">{item.desc}</Text>}
                     </View>
                     <TouchableOpacity onPress={() => setEditingItem(item)} className="p-2 active:bg-gray-100 rounded-lg -mt-1" activeOpacity={0.7}>
@@ -114,8 +114,8 @@ export default function DheetoDetailPage() {
                       </View>
                     </View>
                     <View className="items-end">
-                      <Text className="text-xs text-gray-400">{new Date(item.createdAt).toLocaleDateString()}</Text>
-                      <Text className="text-xs text-gray-400">{new Date(item.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</Text>
+                      <Text className="text-xs text-gray-400">{(item.isSettled && item.settledAt !== null)?("settled at " + new Date(item.settledAt).toDateString()):"active"}</Text>
+                      <Text className="text-xs text-gray-400">{"created at "+new Date(item.createdAt).toDateString()}</Text>
                     </View>
                   </View>
                 </View>

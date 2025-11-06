@@ -1,12 +1,11 @@
 // lib/components/dheeto-components.tsx
 import { updateItem, addItem, deleteItem } from "@/lib/api/item";
 import { updateTransaction, addTransaction, deleteTransaction } from "@/lib/api/transaction";
-import { settleItem } from "@/lib/api/item";
 import { X, Trash2, CheckCircle, RotateCcw } from "lucide-react-native";
 import { useState } from "react";
-import { Modal, View, TouchableOpacity, Alert, ScrollView, TextInput, ActivityIndicator, Text } from "react-native";
+import { Modal, View, TouchableOpacity, Alert, ScrollView, TextInput, ActivityIndicator, Text, Switch } from "react-native";
 
-const BaseModal = ({ title, onClose, children, showDelete = false, onDelete, showSettle = false, onSettle, showUnsettle = false, onUnsettle }: any) => (
+const BaseModal = ({ title, onClose, children, showDelete = false, onDelete}: any) => (
   <Modal visible transparent animationType="slide">
     <View className="flex-1 bg-black/50 justify-center">
       <View className="bg-white mx-4 rounded-2xl p-5 max-h-[75%]">
@@ -14,16 +13,6 @@ const BaseModal = ({ title, onClose, children, showDelete = false, onDelete, sho
           <Text className="text-xl font-bold text-gray-900">{title}</Text>
 
           <View className="flex-row items-center gap-2">
-            {showSettle && (
-              <TouchableOpacity onPress={onSettle} className="p-2 bg-green-50 rounded-lg active:bg-green-100">
-                <CheckCircle size={18} color="#16A34A" />
-              </TouchableOpacity>
-            )}
-            {showUnsettle && (
-              <TouchableOpacity onPress={onUnsettle} className="p-2 bg-orange-50 rounded-lg active:bg-orange-100">
-                <RotateCcw size={18} color="#EA580C" />
-              </TouchableOpacity>
-            )}
             {showDelete && (
               <TouchableOpacity onPress={onDelete} className="p-2 bg-red-50 rounded-lg active:bg-red-100">
                 <Trash2 size={18} color="#DC2626" />
@@ -75,27 +64,49 @@ export const EditItemModal = ({ item, dheetoId, onClose, onUpdate }: any) => {
     purity: item.purity.toString(),
     weightInTola: item.weightInTola.toString(),
     desc: item.desc || "",
+    isSettled: item.isSettled,
+    settledAt: item.settledAt,
   });
+
   const [saving, setSaving] = useState(false);
-  const [settling, setSettling] = useState(false);
 
   const handleSave = async () => {
-    try {
-      setSaving(true);
-      const response = await updateItem(dheetoId, item._id, {
-        ...formData,
-        purity: parseFloat(formData.purity),
-        weightInTola: parseFloat(formData.weightInTola),
-      });
-      if (response.success) {
-        Alert.alert("Success", "Item updated successfully");
-        onClose();
-        onUpdate();
+    const settlementChanged = formData.isSettled !== item.isSettled;
+
+    const performSave = async () => {
+      try {
+        setSaving(true);
+        const response = await updateItem(dheetoId, item._id, {
+          ...formData,
+          purity: parseFloat(formData.purity),
+          weightInTola: parseFloat(formData.weightInTola),
+        });
+
+        if (response.success) {
+          Alert.alert("Success", "Item updated successfully");
+          onClose();
+          onUpdate();
+        }
+      } catch {
+        Alert.alert("Error", "Failed to update item");
+      } finally {
+        setSaving(false);
       }
-    } catch {
-      Alert.alert("Error", "Failed to update item");
-    } finally {
-      setSaving(false);
+    };
+
+    if (settlementChanged) {
+      Alert.alert(
+        formData.isSettled ? "Settle Item" : "Unsettle Item",
+        formData.isSettled
+          ? "This will mark the item as settled."
+          : "This will mark the item as unsettled.",
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Confirm", onPress: performSave },
+        ]
+      );
+    } else {
+      performSave();
     }
   };
 
@@ -124,70 +135,8 @@ export const EditItemModal = ({ item, dheetoId, onClose, onUpdate }: any) => {
     ]);
   };
 
-  const handleSettle = () => {
-    Alert.alert("Settle Item", "Mark this item as settled? A settlement date will be recorded.", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Settle",
-        onPress: async () => {
-          try {
-            setSettling(true);
-            const response = await settleItem(dheetoId, item._id, {
-              settledAt: new Date(),
-            });
-            if (response.success) {
-              Alert.alert("Success", "Item settled successfully");
-              onClose();
-              onUpdate();
-            }
-          } catch {
-            Alert.alert("Error", "Failed to settle item");
-          } finally {
-            setSettling(false);
-          }
-        },
-      },
-    ]);
-  };
-
-  const handleUnsettle = () => {
-    Alert.alert("Unsettle Item", "Remove the settlement status? The recorded date will be cleared.", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Unsettle",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            setSettling(true);
-            const response = await settleItem(dheetoId, item._id, {
-              settledAt: null,
-            });
-            if (response.success) {
-              Alert.alert("Success", "Item unsettled successfully");
-              onClose();
-              onUpdate();
-            }
-          } catch {
-            Alert.alert("Error", "Failed to unsettle item");
-          } finally {
-            setSettling(false);
-          }
-        },
-      },
-    ]);
-  };
-
   return (
-    <BaseModal
-      title="Edit Item"
-      onClose={onClose}
-      showDelete
-      onDelete={handleDelete}
-      showSettle={!item.settledAt}
-      onSettle={handleSettle}
-      showUnsettle={!!item.settledAt}
-      onUnsettle={handleUnsettle}
-    >
+    <BaseModal title="Edit Item" onClose={onClose} showDelete onDelete={handleDelete}>
       <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
         <TextInput
           className="bg-gray-50 rounded-xl p-4 mb-4 text-gray-800 border border-gray-200 text-base"
@@ -246,18 +195,31 @@ export const EditItemModal = ({ item, dheetoId, onClose, onUpdate }: any) => {
           multiline
         />
 
-        {item.settledAt ? (
+        {/* Settle Toggle */}
+        <View className="flex-row items-center justify-between mb-4">
+          <Text className="text-base font-semibold text-gray-700">Settled</Text>
+          <Switch
+            value={formData.isSettled}
+            onValueChange={(v) =>
+              setFormData((p) => ({
+                ...p,
+                isSettled: v,
+                settledAt: v ? new Date() : null,
+              }))
+            }
+          />
+        </View>
+
+        {formData.isSettled && (
           <View className="mb-4 p-3 bg-green-50 border border-green-200 rounded-xl">
-            <Text className="text-sm font-medium text-green-700">Settled on {new Date(item.settledAt).toLocaleDateString()}</Text>
-          </View>
-        ) : (
-          <View className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
-            <Text className="text-sm font-medium text-amber-700">Not settled</Text>
+            <Text className="text-sm font-medium text-green-700">
+              Settled on {new Date(formData.settledAt).toLocaleDateString()}
+            </Text>
           </View>
         )}
 
-        <TouchableOpacity onPress={handleSave} className="bg-blue-600 py-4 rounded-xl active:bg-blue-700" disabled={saving || settling}>
-          {saving || settling ? <ActivityIndicator color="#FFFFFF" /> : <Text className="text-white font-bold text-center text-base">Save Changes</Text>}
+        <TouchableOpacity onPress={handleSave} className="bg-blue-600 py-4 rounded-xl active:bg-blue-700" disabled={saving}>
+          {saving ? <ActivityIndicator color="#FFFFFF" /> : <Text className="text-white font-bold text-center text-base">Save Changes</Text>}
         </TouchableOpacity>
       </ScrollView>
     </BaseModal>
@@ -366,7 +328,7 @@ export const AddItemModal = ({ dheetoId, onClose, onUpdate }: any) => {
   const [formData, setFormData] = useState({
     name: "",
     type: "gold" as "gold" | "silver",
-    purity: "",
+    purity: "24",
     weightInTola: "",
     desc: "",
   });

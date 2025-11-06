@@ -42,4 +42,4 @@ export type GetDheetoResponse = SuccessResponse<Dheeto> | ErrorResponse;
 export type DeleteDheetoResponse = SuccessMessageResponse | ErrorResponse;
 export type GetAllDheetosResponse = PaginatedResponse<Dheeto> | ErrorResponse;
 export type SearchDheetosResponse = PaginatedResponse<Dheeto> | ErrorResponse;
-export type SettleDheetoResponse = (SuccessResponse<Dheeto> & { message: string }) | ErrorResponse;
+export type SettleDheetoResponse = SuccessResponse<Dheeto> | ErrorResponse;

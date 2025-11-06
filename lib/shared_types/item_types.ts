@@ -15,6 +15,8 @@ export interface UpdateItemBody {
   purity?: number;
   weightInTola?: number;
   desc?: string;
+  isSettled?: boolean;
+  settledAt?:Date| null;
 }
 
 export interface ItemIdParams {
@@ -22,10 +24,6 @@ export interface ItemIdParams {
   itemId: string;
 }
 
-export interface SettleItemBody {
-  settledAt: Date | null;
-}
 export type AddItemResponse = SuccessResponse<Dheeto> | ErrorResponse;
 export type UpdateItemResponse = SuccessResponse<Dheeto> | ErrorResponse;
 export type DeleteItemResponse = SuccessMessageResponse | ErrorResponse;
-export type SettleItemResponse = SuccessResponse<Dheeto> | ErrorResponse;
