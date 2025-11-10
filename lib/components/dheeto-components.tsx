@@ -4,6 +4,9 @@ import { updateTransaction, addTransaction, deleteTransaction } from "@/lib/api/
 import { X, Trash2, CheckCircle, RotateCcw } from "lucide-react-native";
 import { useState } from "react";
 import { Modal, View, TouchableOpacity, Alert, ScrollView, TextInput, ActivityIndicator, Text, Switch } from "react-native";
+import { updateDheeto } from "@/lib/api/dheeto";
+import { Dheeto } from "@/lib/shared_types/db_types";
+
 
 const BaseModal = ({ title, onClose, children, showDelete = false, onDelete}: any) => (
   <Modal visible transparent animationType="slide">
@@ -504,3 +507,85 @@ export const AddTransactionModal = ({ dheetoId, onClose, onUpdate }: any) => {
     </BaseModal>
   );
 };
+
+
+interface EditDheetoModalProps {
+  dheeto: Dheeto;
+  onClose: () => void;
+  onUpdate: () => void;
+}
+
+export function EditDheetoModal({ dheeto, onClose, onUpdate }: EditDheetoModalProps) {
+  const [formData, setFormData] = useState({
+    desc: dheeto.desc || "",
+    isSettled: dheeto.isSettled || false,
+  });
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      const response = await updateDheeto(dheeto._id, formData);
+      
+      if (response.success) {
+        Alert.alert("Success", "Dheeto updated successfully");
+        onUpdate();
+        onClose();
+      } else {
+        Alert.alert("Error", response.message || "Failed to update dheeto");
+      }
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to update dheeto");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <BaseModal title="Edit Dheeto" onClose={onClose}>
+      <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
+        <TextInput
+          className="bg-gray-50 rounded-xl p-4 mb-6 text-gray-800 border border-gray-200 text-base"
+          placeholder="Description (optional)"
+          value={formData.desc}
+          onChangeText={(t) => setFormData((p) => ({ ...p, desc: t }))}
+          multiline
+          numberOfLines={3}
+        />
+
+        {/* Settle Toggle */}
+        <View className="flex-row items-center justify-between mb-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+          <View className="flex-1 pr-4">
+            <Text className="text-base font-semibold text-gray-900 mb-1">Mark as Settled</Text>
+            <Text className="text-xs text-gray-600">Once settled, this dheeto will be marked as complete</Text>
+          </View>
+          <Switch
+            value={formData.isSettled}
+            onValueChange={(v) => setFormData((p) => ({ ...p, isSettled: v }))}
+          />
+        </View>
+
+        {formData.isSettled && (
+          <View className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+            <Text className="text-sm font-medium text-green-700 text-center">
+              ✓ This dheeto will be marked as settled
+            </Text>
+          </View>
+        )}
+
+        <TouchableOpacity 
+          onPress={handleSave} 
+          className="bg-blue-600 py-4 rounded-xl active:bg-blue-700 mb-2" 
+          disabled={saving}
+          activeOpacity={0.8}
+        >
+          {saving ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text className="text-white font-bold text-center text-base">Save Changes</Text>
+          )}
+        </TouchableOpacity>
+      </ScrollView>
+    </BaseModal>
+  );
+}

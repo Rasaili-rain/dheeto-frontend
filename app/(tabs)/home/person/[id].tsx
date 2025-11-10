@@ -8,104 +8,7 @@ import { Person, Dheeto } from "@/lib/shared_types/db_types";
 import { GetPersonResponse } from "@/lib/shared_types/person_types";
 import Toast, { ToastType } from "@/lib/components/Toast";
 import { User, Phone, FileText, Trash2, Plus, ChevronLeft, Package, TrendingUp, TrendingDown, ChevronRight, Clock, MoreVertical } from "lucide-react-native";
-
-const DheetoCard = ({ dheeto, onPress }: { dheeto: Dheeto; onPress: () => void }) => {
-  const totalWeight = dheeto.items.reduce((sum: any, item: { weightInTola: any }) => sum + item.weightInTola, 0);
-  const goldItems = dheeto.items.filter((item: { type: string }) => item.type === "gold").length;
-  const silverItems = dheeto.items.filter((item: { type: string }) => item.type === "silver").length;
-
-  const totalGave = dheeto.transactions.filter((t: { type: string }) => t.type === "gave").reduce((sum: any, t: { amount: any }) => sum + t.amount, 0);
-  const totalReceived = dheeto.transactions.filter((t: { type: string }) => t.type === "received").reduce((sum: any, t: { amount: any }) => sum + t.amount, 0);
-  const balance = totalReceived - totalGave;
-
-  return (
-    <TouchableOpacity onPress={onPress} className="bg-white rounded-xl p-3.5 border border-gray-200 shadow-sm active:scale-[0.98]" activeOpacity={0.7}>
-      {/* Header Row - Compact */}
-      <View className="flex-row items-center justify-between mb-2.5">
-        <View className="flex-1 flex-row items-center gap-2">
-          {dheeto.desc ? (
-            <Text className="text-sm font-bold text-gray-900 flex-1" numberOfLines={1}>
-              {dheeto.desc}
-            </Text>
-          ) : (
-            <Text className="text-sm font-semibold text-gray-400 flex-1">Untitled Dheeto</Text>
-          )}
-          <View className={`px-2 py-0.5 rounded-md ${dheeto.isSettled ? "bg-green-100" : "bg-orange-100"}`}>
-            <Text className={`text-[10px] font-bold ${dheeto.isSettled ? "text-green-700" : "text-orange-700"}`}>{dheeto.isSettled ? "✓ Settled" : "⏱ Active"}</Text>
-          </View>
-        </View>
-        <ChevronRight size={18} color="#9CA3AF" className="ml-2" />
-      </View>
-
-      {/* Date */}
-      <View className="flex-row items-center gap-1 mb-3">
-        <Clock size={10} color="#9CA3AF" />
-        <Text className="text-[10px] text-gray-500">{new Date(dheeto.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</Text>
-      </View>
-
-      {/* Items & Balance Row - Compact */}
-      <View className="flex-row items-center justify-between bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-2.5 mb-2.5">
-        {/* Items */}
-        <View className="flex-row items-center gap-2.5">
-          {goldItems > 0 && (
-            <View className="flex-row items-center gap-1">
-              <View className="bg-yellow-400 w-4 h-4 rounded-full items-center justify-center">
-                <Text className="text-[8px]">GOLD</Text>
-              </View>
-              <Text className="text-xs font-semibold text-gray-700">{goldItems}</Text>
-            </View>
-          )}
-          {silverItems > 0 && (
-            <View className="flex-row items-center gap-1">
-              <View className="bg-gray-300 w-4 h-4 rounded-full items-center justify-center">
-                <Text className="text-[8px]">SILVER</Text>
-              </View>
-              <Text className="text-xs font-semibold text-gray-700">{silverItems}</Text>
-            </View>
-          )}
-          {(goldItems > 0 || silverItems > 0) && <View className="h-3 w-px bg-gray-300" />}
-          <Text className="text-xs text-gray-600">
-            <Text className="font-bold text-gray-800">{totalWeight.toFixed(1)}</Text>
-            <Text className="text-[10px]"> tola</Text>
-          </Text>
-        </View>
-
-        {/* Balance - Prominent */}
-        <View className="items-end">
-          <Text className="text-[9px] text-gray-500 uppercase tracking-wide mb-0.5">Balance</Text>
-          <Text className={`text-base font-extrabold ${balance >= 0 ? "text-green-600" : "text-red-600"}`}>
-            {balance >= 0 ? "+" : "-"}₹{Math.abs(balance).toLocaleString()}
-          </Text>
-        </View>
-      </View>
-
-      {/* Transactions Footer - Minimal */}
-      {(totalGave > 0 || totalReceived > 0) && (
-        <View className="flex-row items-center justify-between pt-2 border-t border-gray-100">
-          <View className="flex-row items-center gap-3">
-            {totalGave > 0 && (
-              <View className="flex-row items-center gap-1">
-                <View className="bg-red-100 px-1.5 py-0.5 rounded">
-                  <Text className="text-[9px] font-bold text-red-700">DOWN</Text>
-                </View>
-                <Text className="text-xs text-gray-600">₹{totalGave.toLocaleString()}</Text>
-              </View>
-            )}
-            {totalReceived > 0 && (
-              <View className="flex-row items-center gap-1">
-                <View className="bg-green-100 px-1.5 py-0.5 rounded">
-                  <Text className="text-[9px] font-bold text-green-700">UP</Text>
-                </View>
-                <Text className="text-xs text-gray-600">₹{totalReceived.toLocaleString()}</Text>
-              </View>
-            )}
-          </View>
-          <Text className="text-[10px] text-gray-400">{dheeto.transactions.length} txn</Text>
-        </View>
-      )}
-    </TouchableOpacity>
-  );
-};
+import { DheetoCard } from "@/lib/components/person-components";
 
 export default function PersonDetailRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -120,6 +23,7 @@ export default function PersonDetailRoute() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [filter, setFilter] = useState<"all" | "settled" | "unsettled">("all");
   const [toast, setToast] = useState<{
     show: boolean;
     message: string;
@@ -129,6 +33,12 @@ export default function PersonDetailRoute() {
   const displayToast = (msg: string, type: ToastType = "success") => {
     setToast({ show: true, message: msg, type });
     setTimeout(() => setToast((p) => ({ ...p, show: false })), 3000);
+  };
+
+  const handleFilterChange = (newFilter: typeof filter) => {
+    // setFilter(newFilter);
+    // TODO
+    // fetchDheetos(newFilter);
   };
 
   const fetchDheetos = async () => {
@@ -303,6 +213,30 @@ export default function PersonDetailRoute() {
               <Package size={48} color="#9CA3AF" />
               <Text className="text-gray-900 font-semibold text-lg mt-3">No Dheetos Yet</Text>
               <Text className="text-gray-500 text-sm text-center mt-1">Start by adding your first dheeto for {person.name}</Text>
+            </View>
+          )}
+
+          {/* dheeto filters */}
+          {dheetos.length > 0 && (
+            <View className="mx-4  mb-3">
+              {/* Segmented Button: All / Settled / Unsettled */}
+              <View className="flex-row mt-3 bg-gray-100 p-1 rounded-full">
+                <TouchableOpacity className={`flex-1 py-2 rounded-full ${filter === "all" ? "bg-white shadow-sm" : ""}`} onPress={() => handleFilterChange("all")}>
+                  <Text className={`text-center text-xs font-medium ${filter === "all" ? "text-blue-700" : "text-gray-600"}`}>All ({dheetos.length})</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity className={`flex-1 py-2 rounded-full ${filter === "settled" ? "bg-white shadow-sm" : ""}`} onPress={() => handleFilterChange("settled")}>
+                  <Text className={`text-center text-xs font-medium ${filter === "settled" ? "text-green-700" : "text-gray-600"}`}>
+                    Settled ({dheetos.length - person.unsettledDheetosCount})
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity className={`flex-1 py-2 rounded-full ${filter === "unsettled" ? "bg-white shadow-sm" : ""}`} onPress={() => handleFilterChange("unsettled")}>
+                  <Text className={`text-center text-xs font-medium ${filter === "unsettled" ? "text-orange-700" : "text-gray-600"}`}>
+                    Unsettled ({person.unsettledDheetosCount})
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
 

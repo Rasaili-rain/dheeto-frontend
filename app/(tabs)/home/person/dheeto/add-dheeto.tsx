@@ -18,7 +18,7 @@ export default function AddDheetoPage() {
   const [currentItem, setCurrentItem] = useState({
     name: "",
     type: "gold" as "gold" | "silver",
-    purity: "",
+    purity: "24",
     weightInTola: "",
     desc: "",
   });
@@ -183,14 +183,7 @@ export default function AddDheetoPage() {
             <View className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl p-4 mb-4 border-2 border-amber-200">
               <Text className="text-base font-bold text-amber-900 mb-3">Add Item</Text>
 
-              <TextInput
-                className="bg-white rounded-xl p-3 mb-3 text-gray-800 border border-amber-200"
-                placeholder="Item name (e.g., Gold Ring)"
-                value={currentItem.name}
-                onChangeText={(text) => setCurrentItem((prev) => ({ ...prev, name: text }))}
-                editable={!saving}
-              />
-
+              {/* Gold or silver */}
               <View className="flex-row gap-2 mb-3">
                 <TouchableOpacity
                   onPress={() => setCurrentItem((prev) => ({ ...prev, type: "gold" }))}
@@ -210,12 +203,23 @@ export default function AddDheetoPage() {
                 </TouchableOpacity>
               </View>
 
+              {/* Description */}
+              <View className="mb-4">
+                <Text className="text-m font-semibold text-gray-700 mb-2">Item Name</Text>
+                <TextInput
+                  className="bg-white rounded-2xl p-4 text-lg text-gray-800 border border-amber-300"
+                  placeholder="e.g., Gold Ring"
+                  value={currentItem.name}
+                  onChangeText={(text) => setCurrentItem((prev) => ({ ...prev, name: text }))}
+                  editable={!saving}
+                />
+              </View>
+
               <View className="flex-row gap-2 mb-3">
                 <View className="flex-1">
-                  <Text className="text-xs text-amber-700 mb-1 ml-1 font-medium">Purity (%)</Text>
+                  <Text className="text-xs text-amber-700 mb-1 ml-1 font-medium">Purity (ct)</Text>
                   <TextInput
                     className="bg-white rounded-xl p-3 text-gray-800 border border-amber-200"
-                    placeholder="e.g., 22"
                     keyboardType="decimal-pad"
                     value={currentItem.purity}
                     onChangeText={(text) => setCurrentItem((prev) => ({ ...prev, purity: text }))}
@@ -226,7 +230,6 @@ export default function AddDheetoPage() {
                   <Text className="text-xs text-amber-700 mb-1 ml-1 font-medium">Weight (tola)</Text>
                   <TextInput
                     className="bg-white rounded-xl p-3 text-gray-800 border border-amber-200"
-                    placeholder="e.g., 2.5"
                     keyboardType="decimal-pad"
                     value={currentItem.weightInTola}
                     onChangeText={(text) => setCurrentItem((prev) => ({ ...prev, weightInTola: text }))}

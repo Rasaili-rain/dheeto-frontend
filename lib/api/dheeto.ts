@@ -22,7 +22,7 @@ export const getDheetoById = async (id: string): Promise<GetDheetoResponse> => {
   return res.data;
 };
 
-export const getAllDheetos = async (query?: GetAllDheetosQuery): Promise<GetAllDheetosResponse> => {
+export const getAllDheetos = async (query: GetAllDheetosQuery): Promise<GetAllDheetosResponse> => {
   const res = await api.get("/all-dheetos", { params: query });
   return res.data;
 };

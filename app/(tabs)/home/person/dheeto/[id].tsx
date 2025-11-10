@@ -5,7 +5,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState, useEffect } from "react";
 import { getDheetoById } from "@/lib/api/dheeto";
 import { Dheeto } from "@/lib/shared_types/db_types";
-import { EditItemModal, EditTransactionModal, AddItemModal, AddTransactionModal } from "@/lib/components/dheeto-components";
+import { EditItemModal, EditTransactionModal, AddItemModal, AddTransactionModal, EditDheetoModal } from "@/lib/components/dheeto-components";
 import { LoadingSpinner } from "@/lib/components/loading-spinner";
 
 export default function DheetoDetailPage() {
@@ -18,6 +18,7 @@ export default function DheetoDetailPage() {
   const [editingTransaction, setEditingTransaction] = useState<any>(null);
   const [showAddItem, setShowAddItem] = useState(false);
   const [showAddTransaction, setShowAddTransaction] = useState(false);
+  const [showEditDheeto, setShowEditDheeto] = useState(false);
 
   const loadDheeto = async (isRefresh = false) => {
     if (!id) return;
@@ -60,7 +61,9 @@ export default function DheetoDetailPage() {
             <ChevronLeft size={24} color="#374151" strokeWidth={2.5} />
           </TouchableOpacity>
           <Text className="text-xl font-bold text-gray-900">Dheeto Details</Text>
-          <View className="w-10" />
+          <TouchableOpacity onPress={() => setShowEditDheeto(true)} className="p-2 -mr-2 active:bg-gray-100 rounded-full" activeOpacity={0.7}>
+            <Edit2 size={20} color="#374151" strokeWidth={2.5} />
+          </TouchableOpacity>
         </View>
         {dheeto.desc && (
           <Text className="text-sm text-gray-600 text-center mt-1 px-4" numberOfLines={2}>
@@ -204,6 +207,7 @@ export default function DheetoDetailPage() {
       {editingTransaction && <EditTransactionModal transaction={editingTransaction} dheetoId={dheeto._id} onClose={() => setEditingTransaction(null)} onUpdate={loadDheeto} />}
       {showAddItem && <AddItemModal dheetoId={dheeto._id} onClose={() => setShowAddItem(false)} onUpdate={loadDheeto} />}
       {showAddTransaction && <AddTransactionModal dheetoId={dheeto._id} onClose={() => setShowAddTransaction(false)} onUpdate={loadDheeto} />}
+      {showEditDheeto && <EditDheetoModal dheeto={dheeto} onClose={() => setShowEditDheeto(false)} onUpdate={loadDheeto} />}
     </View>
   );
 }
