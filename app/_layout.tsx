@@ -1,14 +1,10 @@
-// app/_layout.tsx
-import { Stack } from "expo-router";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "../global.css";
+import { Stack } from "expo-router";
 
-export default function RootLayout() {
+export default function Layout() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
-    </GestureHandlerRootView>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+    </Stack>
   );
 }

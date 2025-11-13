@@ -60,7 +60,7 @@ const PersonCard = ({ person, onPress }: PersonCardProps) => {
       <View className="flex-row gap-2">
         {/* Cash */}
         <View className={`flex-1 rounded-xl p-3 ${isPositiveBalance ? "bg-green-50 border-2 border-green-300" : "bg-red-50 border-2 border-red-300"}`}>
-          <View className={`w-7 h-7 rounded-full items-center justify-center mb-1.5 ${isPositiveBalance ? "bg-green-200" : "bg-red-200"}`}>
+          <View className={`w-f h-7 rounded-full items-center justify-center mb-1.5 ${isPositiveBalance ? "bg-green-200" : "bg-red-200"}`}>
             <DollarSign size={15} color={isPositiveBalance ? "#15803d" : "#b91c1c"} strokeWidth={3} />
           </View>
           <View className="flex-row items-center justify-between">
@@ -74,7 +74,7 @@ const PersonCard = ({ person, onPress }: PersonCardProps) => {
 
         {/* Gold */}
         <View className="flex-1 bg-yellow-50 border-2 border-yellow-400 rounded-xl p-3">
-          <View className="w-7 h-7 rounded-full bg-yellow-400 items-center justify-center mb-1.5">
+          <View className="w-f h-7 rounded-full bg-yellow-400 items-center justify-center mb-1.5">
             <Text className="text-[10px] font-black text-yellow-900">Gold</Text>
           </View>
           <View className="flex-row items-center justify-between">
@@ -85,7 +85,7 @@ const PersonCard = ({ person, onPress }: PersonCardProps) => {
 
         {/* Silver */}
         <View className="flex-1 bg-slate-100 border-2 border-slate-400 rounded-xl p-3">
-          <View className="w-7 h-7 rounded-full bg-slate-400 items-center justify-center mb-1.5">
+          <View className="w-f h-7 rounded-full bg-slate-400 items-center justify-center mb-1.5">
             <Text className="text-[10px] font-black text-black">Silver</Text>
           </View>
           <View className="flex-row items-center justify-between">

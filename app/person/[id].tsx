@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ActivityIndicator, Alert, ScrollView, RefreshControl, Modal } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { fetchPersonById, deletePerson } from "@/lib/api/person";
-import { getAllDheetos } from "@/lib/api/dheeto";
 import { Person, Dheeto } from "@/lib/shared_types/db_types";
 import { GetPersonResponse } from "@/lib/shared_types/person_types";
 import Toast, { ToastType } from "@/lib/components/Toast";
@@ -14,16 +13,14 @@ export default function PersonDetailRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
 
-  const goToIndividualDheetoPage = (dheetoId: string) => router.push(`/home/person/dheeto/${dheetoId}`);
+  const goToIndividualDheetoPage = (dheetoId: string) => router.push(`/person/dheeto/${dheetoId}`);
   const goToAddDheetoPage = (personId: string, personName: string) =>
-    router.push(`/home/person/dheeto/add-dheeto?personId=${personId}&personName=${encodeURIComponent(personName)}`);
+    router.push(`/person/dheeto/add-dheeto?personId=${personId}&personName=${encodeURIComponent(personName)}`);
 
   const [person, setPerson] = useState<Person | null>(null);
-  const [dheetos, setDheetos] = useState<Dheeto[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const [filter, setFilter] = useState<"all" | "settled" | "unsettled">("all");
   const [toast, setToast] = useState<{
     show: boolean;
     message: string;
@@ -35,26 +32,8 @@ export default function PersonDetailRoute() {
     setTimeout(() => setToast((p) => ({ ...p, show: false })), 3000);
   };
 
-  const handleFilterChange = (newFilter: typeof filter) => {
-    // setFilter(newFilter);
-    // TODO
-    // fetchDheetos(newFilter);
-  };
 
-  const fetchDheetos = async () => {
-    if (!person) return;
-    try {
-      const response = await getAllDheetos({ personId: person._id });
-      if (response.success && response.data) {
-        setDheetos(response.data);
-      }
-    } catch (error) {
-      console.error("Error fetching dheetos:", error);
-      Alert.alert("Error", "Failed to load dheetos");
-    } finally {
-      setRefreshing(false);
-    }
-  };
+
 
   const loadPerson = async () => {
     if (!id) return;
@@ -73,7 +52,7 @@ export default function PersonDetailRoute() {
 
   const handleRefresh = () => {
     setRefreshing(true);
-    fetchDheetos();
+    loadPerson();
   };
 
   const handleDeletePerson = () => {
@@ -102,11 +81,6 @@ export default function PersonDetailRoute() {
     loadPerson();
   }, [id]);
 
-  useEffect(() => {
-    if (person) {
-      fetchDheetos();
-    }
-  }, [person?._id]);
 
   if (loading) {
     return (
@@ -169,7 +143,7 @@ export default function PersonDetailRoute() {
                     {isPositiveBalance ? "+" : "-"}₹{Math.abs(person.totalBalance).toLocaleString()}
                   </Text>
                   <Text className="text-xs text-gray-500 mt-1">
-                    {person.unsettledDheetosCount} unsettled • {dheetos.length - person.unsettledDheetosCount} settled
+                    {person.unsettledDheetosCount} unsettled
                   </Text>
                 </View>
                 <View className={`p-4 rounded-full ${isPositiveBalance ? "bg-green-200" : "bg-red-200"}`}>
@@ -202,13 +176,13 @@ export default function PersonDetailRoute() {
                 <Text className="text-xl font-bold text-gray-900">Dheetos</Text>
               </View>
               <View className="bg-blue-100 px-3 py-1 rounded-full">
-                <Text className="text-blue-700 font-semibold text-sm">{dheetos.length}</Text>
+                <Text className="text-blue-700 font-semibold text-sm">{person.dheetos.length}</Text>
               </View>
             </View>
           </View>
 
           {/* Empty State */}
-          {dheetos.length === 0 && (
+          {person.dheetos.length === 0 && (
             <View className="mx-4 bg-white rounded-2xl p-8 items-center border border-gray-100">
               <Package size={48} color="#9CA3AF" />
               <Text className="text-gray-900 font-semibold text-lg mt-3">No Dheetos Yet</Text>
@@ -216,34 +190,11 @@ export default function PersonDetailRoute() {
             </View>
           )}
 
-          {/* dheeto filters */}
-          {dheetos.length > 0 && (
-            <View className="mx-4  mb-3">
-              {/* Segmented Button: All / Settled / Unsettled */}
-              <View className="flex-row mt-3 bg-gray-100 p-1 rounded-full">
-                <TouchableOpacity className={`flex-1 py-2 rounded-full ${filter === "all" ? "bg-white shadow-sm" : ""}`} onPress={() => handleFilterChange("all")}>
-                  <Text className={`text-center text-xs font-medium ${filter === "all" ? "text-blue-700" : "text-gray-600"}`}>All ({dheetos.length})</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity className={`flex-1 py-2 rounded-full ${filter === "settled" ? "bg-white shadow-sm" : ""}`} onPress={() => handleFilterChange("settled")}>
-                  <Text className={`text-center text-xs font-medium ${filter === "settled" ? "text-green-700" : "text-gray-600"}`}>
-                    Settled ({dheetos.length - person.unsettledDheetosCount})
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity className={`flex-1 py-2 rounded-full ${filter === "unsettled" ? "bg-white shadow-sm" : ""}`} onPress={() => handleFilterChange("unsettled")}>
-                  <Text className={`text-center text-xs font-medium ${filter === "unsettled" ? "text-orange-700" : "text-gray-600"}`}>
-                    Unsettled ({person.unsettledDheetosCount})
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
 
           {/* Dheetos List */}
-          {dheetos.length > 0 && (
+          {person.dheetos.length > 0 && (
             <View className="mx-4 space-y-3">
-              {dheetos.map((dheeto) => (
+              {person.dheetos.map((dheeto) => (
                 <DheetoCard key={dheeto._id} dheeto={dheeto} onPress={() => goToIndividualDheetoPage(dheeto._id)} />
               ))}
             </View>
