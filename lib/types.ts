@@ -74,6 +74,44 @@ export interface PaginationMeta {
   hasPrev: boolean;
 }
 
+
+// -----------------Person types-----------------
+
+export interface CreatePersonBody {
+  name: string;
+  phoneNo?: string;
+  desc?: string;
+}
+export interface UpdatePersonBody {
+  name?: string;
+  phoneNo?: string;
+  desc?: string;
+}
+export interface PersonIdParams {
+  id: string;
+}
+export interface GetAllPersonsQuery {
+  page?:number;
+  limit?:number;
+  sortBy?: string;
+  order?: string;
+  includeSettled?: string;
+}
+export interface SearchPersonQuery {
+  name?: string;
+  phoneNo?: string;
+  createdAfter?: Date;
+  createdBefore?: Date;
+  page?:number;
+  limit?:number;
+}
+export type AddPersonResponse = SuccessResponse<Person> | ErrorResponse;
+export type UpdatePersonResponse = SuccessResponse<Person> | ErrorResponse;
+export type GetPersonResponse = SuccessResponse<Person> | ErrorResponse;
+export type DeletePersonResponse = SuccessMessageResponse | ErrorResponse;
+export type GetAllPersonsResponse = PaginatedResponse<Person> | ErrorResponse;
+export type SearchPersonResponse = PaginatedResponse<Person> | ErrorResponse;
+
 // --------------Dheeto types------------
 export interface CreateDheetoBody {
   personId: string;
@@ -112,6 +150,9 @@ export type DeleteDheetoResponse = SuccessMessageResponse | ErrorResponse;
 export type GetAllDheetosResponse = PaginatedResponse<Dheeto> | ErrorResponse;
 export type SearchDheetosResponse = PaginatedResponse<Dheeto> | ErrorResponse;
 
+
+//------------Items Typess -----------------
+
 export interface AddItemBody {
   name: string;
   type: "gold" | "silver";
@@ -132,63 +173,29 @@ export interface ItemIdParams {
   dheetoId: string;
   itemId: string;
 }
-export type AddItemResponse = SuccessResponse<Dheeto> | ErrorResponse;
-export type UpdateItemResponse = SuccessResponse<Dheeto> | ErrorResponse;
+export type GetItemsByDheetoIdResponse = SuccessResponse<PaginatedResponse<Item>> | ErrorResponse
+export type AddItemResponse = SuccessResponse<Item> | ErrorResponse;
+export type UpdateItemResponse = SuccessResponse<Item> | ErrorResponse;
 export type DeleteItemResponse = SuccessMessageResponse | ErrorResponse;
 
-export interface CreatePersonBody {
-  name: string;
-  phoneNo?: string;
-  desc?: string;
-}
-export interface UpdatePersonBody {
-  name?: string;
-  phoneNo?: string;
-  desc?: string;
-}
-export interface PersonIdParams {
-  id: string;
-}
-export interface GetAllPersonsQuery {
-  page?:number;
-  limit?:number;
-  sortBy?: string;
-  order?: string;
-  includeSettled?: string;
-}
-export interface SearchPersonQuery {
-  name?: string;
-  phoneNo?: string;
-  createdAfter?: Date;
-  createdBefore?: Date;
-  page?:number;
-  limit?:number;
-}
 
-export type AddPersonResponse = SuccessResponse<Person> | ErrorResponse;
-export type UpdatePersonResponse = SuccessResponse<Person> | ErrorResponse;
-export type GetPersonResponse = SuccessResponse<Person> | ErrorResponse;
-export type DeletePersonResponse = SuccessMessageResponse | ErrorResponse;
-export type GetAllPersonsResponse = PaginatedResponse<Person> | ErrorResponse;
-export type SearchPersonResponse = PaginatedResponse<Person> | ErrorResponse;
-
+// -----------------Transaction Types ------------------------\
 export interface AddTransactionBody {
   type: "gave" | "received";
   amount: number;
   desc?: string;
 }
-
 export interface UpdateTransactionBody {
   type?: "gave" | "received";
   amount?: number;
   desc?: string;
 }
-
 export interface TransactionIdParams {
   dheetoId: string;
   transactionId: string;
 }
 
-export type AddTransactionResponse = SuccessResponse<Dheeto> | ErrorResponse;
-export type UpdateTransactionResponse = SuccessResponse<Dheeto> | ErrorResponse;
+export type GetTransactionsByDheetoIdResponse = SuccessResponse<PaginatedResponse<Transaction>> | ErrorResponse;
+export type AddTransactionResponse = SuccessResponse<Transaction> | ErrorResponse;
+export type UpdateTransactionResponse = SuccessResponse<Transaction> | ErrorResponse;
 export type DeleteTransactionResponse = SuccessMessageResponse | ErrorResponse;

@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
-import { PaginationMeta } from "@/lib/shared_types/types";
+import { PaginationMeta } from "../types";
 
 interface PaginationControlsProps {
   pagination: PaginationMeta;

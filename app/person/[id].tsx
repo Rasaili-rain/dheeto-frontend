@@ -4,15 +4,14 @@ import { View, Text, TouchableOpacity, ActivityIndicator, Alert, ScrollView, Ref
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 import Toast, { ToastType } from "@/lib/components/Toast";
-import { User, Phone, FileText, Trash2, Plus, ChevronLeft, Package, TrendingUp, TrendingDown, MoreVertical } from "lucide-react-native";
+import { User, Phone, FileText, Trash2, Plus, ChevronLeft, Package, TrendingUp, TrendingDown, MoreVertical, Clock } from "lucide-react-native";
 import { deletePerson, fetchPersonById, getAllDheetos } from "@/lib/api/api_providers";
-import { Person, GetPersonResponse, GetAllDheetosResponse, GetAllDheetosQuery, Dheeto } from "@/lib/types";
-import { DheetoCard } from "@/lib/components/person-components";
+import { Person, GetAllDheetosResponse, GetAllDheetosQuery, Dheeto } from "@/lib/types";
 
 export default function PersonDetailRoute() {
   const { person: personParam } = useLocalSearchParams();
 
-  const person: Person | undefined = personParam
+  const currentPerson: Person | undefined = personParam
     ? (() => {
         const parsed = JSON.parse(personParam as string);
         return {
@@ -21,16 +20,22 @@ export default function PersonDetailRoute() {
         } as Person;
       })()
     : undefined;
-
-  console.log(person);
-
-  if (person === undefined) return;
+  if (currentPerson === undefined) {
+    console.error("Person cant be undefined");
+    return (
+      <View className="flex-1 justify-center items-center bg-gray-50">
+        <Text className="text-gray-500 mb-4">Person not found</Text>
+        <TouchableOpacity onPress={() => router.back()} className="bg-indigo-600 px-6 py-3 rounded-xl">
+          <Text className="text-white font-bold">Back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   const router = useRouter();
-  
   const goToIndividualDheetoPage = (dheetoId: string) => router.push(`/person/dheeto/${dheetoId}`);
   const goToAddDheetoPage = (personId: string, personName: string) => router.push(`/person/dheeto/add-dheeto?personId=${personId}&personName=${encodeURIComponent(personName)}`);
-
+  const [person, setPerson] = useState<Person>(currentPerson);
   const [dheetos, setDheetos] = useState<Dheeto[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -41,17 +46,19 @@ export default function PersonDetailRoute() {
     type: ToastType;
   }>({ show: false, message: "", type: "success" });
 
+  useEffect(() => {
+    loadAllDheetos();
+  }, [person.id]);
+
   const displayToast = (msg: string, type: ToastType = "success") => {
     setToast({ show: true, message: msg, type });
     setTimeout(() => setToast((p) => ({ ...p, show: false })), 3000);
   };
 
-
-
-  const loadDheetos = async () => {
+  const loadAllDheetos = async () => {
     if (!person.id) return;
     setLoading(true);
-    const query: GetAllDheetosQuery = { personId: person?.id, isSettled: "all", page: 0, limit: 100 };
+    const query: GetAllDheetosQuery = { personId: person.id, isSettled: "all" };
     try {
       const res = (await getAllDheetos(query)) as GetAllDheetosResponse;
       if (!res.success) throw new Error(res.message);
@@ -64,9 +71,26 @@ export default function PersonDetailRoute() {
     }
   };
 
+  const reloadperson = async () => {
+    if (!person.id) return;
+    setLoading(true);
+    try {
+      const res = await fetchPersonById(person.id);
+      if (!res.success) throw new Error(res.message);
+      setPerson(res.data);
+    } catch (e: any) {
+      displayToast(e.message ?? "Failed", "error");
+      router.back();
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleRefresh = () => {
     setRefreshing(true);
-    loadDheetos();
+    loadAllDheetos();
+    reloadperson();
+    setRefreshing(false);
   };
 
   const handleDeletePerson = () => {
@@ -90,10 +114,6 @@ export default function PersonDetailRoute() {
       },
     ]);
   };
-
-  useEffect(() => {
-    loadDheetos();
-  }, [person.id]);
 
   if (loading) {
     return (
@@ -255,3 +275,71 @@ export default function PersonDetailRoute() {
     </>
   );
 }
+
+const DheetoCard = ({ dheeto, onPress }: { dheeto: Dheeto; person: Person; onPress: () => void }) => {
+  const isPositive = dheeto.dheetoBalance > 0;
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-md active:scale-[0.98] mb-3"
+      activeOpacity={0.7}
+      style={{
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        elevation: 3,
+      }}
+    >
+      {/* Status Bar at Top */}
+      <View className={`h-1 ${dheeto.isSettled ? "bg-green-500" : "bg-gradient-to-r from-orange-400 to-amber-500"}`} />
+
+      <View className="p-4">
+        {/* Header Section */}
+        <View className="flex-row items-start justify-between mb-3">
+          <View className="flex-1 pr-3">
+            {dheeto.desc ? (
+              <Text className="text-base font-bold text-gray-900 mb-1" numberOfLines={2}>
+                {dheeto.desc}
+              </Text>
+            ) : (
+              <Text className="text-base font-semibold text-gray-400 mb-1">Untitled Dheeto</Text>
+            )}
+
+            {/* Date with better styling */}
+            <View className="flex-row items-center gap-1.5">
+              <Clock size={12} color="#9CA3AF" />
+              <Text className="text-xs text-gray-500">
+                {new Date(dheeto.createdAt).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </Text>
+            </View>
+          </View>
+
+          {/* Status Badge */}
+          <View className={`px-3 py-1.5 rounded-full ${dheeto.isSettled ? "bg-green-100" : "bg-orange-100"}`}>
+            <Text className={`text-xs font-bold ${dheeto.isSettled ? "text-green-700" : "text-orange-700"}`}>{dheeto.isSettled ? "✓ Settled" : "● Active"}</Text>
+          </View>
+        </View>
+
+        {/* Balance Card - Prominent */}
+        <View className={`rounded-xl p-4 mb-3 ${isPositive ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"}`}>
+          <View className="flex-row items-center justify-between">
+            <View className="flex-1">
+              <Text className="text-xs text-gray-600 font-medium mb-1">Balance</Text>
+              <Text className={`text-2xl font-extrabold ${dheeto.dheetoBalance > 0 ? "text-green-700" : "text-red-700"}`}>
+                {isPositive ? "+" : "-"}₹{Math.abs(dheeto.dheetoBalance).toLocaleString()}
+              </Text>
+            </View>
+            <View className={`p-3 rounded-full ${isPositive ? "bg-green-200" : "bg-red-200"}`}>
+              {isPositive ? <TrendingUp size={24} color={isPositive ? "#15803d" : "#b91c1c"} /> : <TrendingDown size={24} color="#b91c1c" />}
+            </View>
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+};

@@ -4,7 +4,7 @@ import { Trash2, X } from "lucide-react-native";
 import { useState } from "react";
 import { Modal, View, TouchableOpacity, ScrollView, Alert, TextInput, Switch, ActivityIndicator , Text} from "react-native";
 import { updateItem, deleteItem, updateTransaction, deleteTransaction, addItem, addTransaction, updateDheeto } from "../api/api_providers";
-import { Dheeto } from "../shared_types/db_types";
+import { Dheeto } from "../types";
 
 
 const BaseModal = ({ title, onClose, children, showDelete = false, onDelete}: any) => (
@@ -524,7 +524,7 @@ export function EditDheetoModal({ dheeto, onClose, onUpdate }: EditDheetoModalPr
   const handleSave = async () => {
     try {
       setSaving(true);
-      const response = await updateDheeto(dheeto._id, formData);
+      const response = await updateDheeto(dheeto.id, formData);
       
       if (response.success) {
         Alert.alert("Success", "Dheeto updated successfully");
