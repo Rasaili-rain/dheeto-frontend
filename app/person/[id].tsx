@@ -1,23 +1,37 @@
-// app/(tabs)/home/person/[id].tsx
+// app/person/[id].tsx
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ActivityIndicator, Alert, ScrollView, RefreshControl, Modal } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { fetchPersonById, deletePerson } from "@/lib/api/person";
-import { Person, Dheeto } from "@/lib/shared_types/db_types";
-import { GetPersonResponse } from "@/lib/shared_types/person_types";
+
 import Toast, { ToastType } from "@/lib/components/Toast";
-import { User, Phone, FileText, Trash2, Plus, ChevronLeft, Package, TrendingUp, TrendingDown, ChevronRight, Clock, MoreVertical } from "lucide-react-native";
+import { User, Phone, FileText, Trash2, Plus, ChevronLeft, Package, TrendingUp, TrendingDown, MoreVertical } from "lucide-react-native";
+import { deletePerson, fetchPersonById, getAllDheetos } from "@/lib/api/api_providers";
+import { Person, GetPersonResponse, GetAllDheetosResponse, GetAllDheetosQuery, Dheeto } from "@/lib/types";
 import { DheetoCard } from "@/lib/components/person-components";
 
 export default function PersonDetailRoute() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { person: personParam } = useLocalSearchParams();
+
+  const person: Person | undefined = personParam
+    ? (() => {
+        const parsed = JSON.parse(personParam as string);
+        return {
+          ...parsed,
+          createdAt: new Date(parsed.createdAt),
+        } as Person;
+      })()
+    : undefined;
+
+  console.log(person);
+
+  if (person === undefined) return;
+
   const router = useRouter();
-
+  
   const goToIndividualDheetoPage = (dheetoId: string) => router.push(`/person/dheeto/${dheetoId}`);
-  const goToAddDheetoPage = (personId: string, personName: string) =>
-    router.push(`/person/dheeto/add-dheeto?personId=${personId}&personName=${encodeURIComponent(personName)}`);
+  const goToAddDheetoPage = (personId: string, personName: string) => router.push(`/person/dheeto/add-dheeto?personId=${personId}&personName=${encodeURIComponent(personName)}`);
 
-  const [person, setPerson] = useState<Person | null>(null);
+  const [dheetos, setDheetos] = useState<Dheeto[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -34,14 +48,14 @@ export default function PersonDetailRoute() {
 
 
 
-
-  const loadPerson = async () => {
-    if (!id) return;
+  const loadDheetos = async () => {
+    if (!person.id) return;
     setLoading(true);
+    const query: GetAllDheetosQuery = { personId: person?.id, isSettled: "all", page: 0, limit: 100 };
     try {
-      const res = (await fetchPersonById(id)) as GetPersonResponse;
+      const res = (await getAllDheetos(query)) as GetAllDheetosResponse;
       if (!res.success) throw new Error(res.message);
-      setPerson(res.data);
+      setDheetos(res.data);
     } catch (e: any) {
       displayToast(e.message ?? "Failed", "error");
       router.back();
@@ -52,7 +66,7 @@ export default function PersonDetailRoute() {
 
   const handleRefresh = () => {
     setRefreshing(true);
-    loadPerson();
+    loadDheetos();
   };
 
   const handleDeletePerson = () => {
@@ -66,7 +80,7 @@ export default function PersonDetailRoute() {
         style: "destructive",
         onPress: async () => {
           try {
-            await deletePerson(person._id);
+            await deletePerson(person.id);
             displayToast("Deleted", "success");
             router.back();
           } catch (e: any) {
@@ -78,9 +92,8 @@ export default function PersonDetailRoute() {
   };
 
   useEffect(() => {
-    loadPerson();
-  }, [id]);
-
+    loadDheetos();
+  }, [person.id]);
 
   if (loading) {
     return (
@@ -142,9 +155,7 @@ export default function PersonDetailRoute() {
                   <Text className={`text-4xl font-bold ${isPositiveBalance ? "text-green-700" : "text-red-700"}`}>
                     {isPositiveBalance ? "+" : "-"}₹{Math.abs(person.totalBalance).toLocaleString()}
                   </Text>
-                  <Text className="text-xs text-gray-500 mt-1">
-                    {person.unsettledDheetosCount} unsettled
-                  </Text>
+                  <Text className="text-xs text-gray-500 mt-1">{person.unsettledDheetosCount} unsettled</Text>
                 </View>
                 <View className={`p-4 rounded-full ${isPositiveBalance ? "bg-green-200" : "bg-red-200"}`}>
                   {isPositiveBalance ? <TrendingUp size={28} color="#15803d" /> : <TrendingDown size={28} color="#b91c1c" />}
@@ -176,13 +187,13 @@ export default function PersonDetailRoute() {
                 <Text className="text-xl font-bold text-gray-900">Dheetos</Text>
               </View>
               <View className="bg-blue-100 px-3 py-1 rounded-full">
-                <Text className="text-blue-700 font-semibold text-sm">{person.dheetos.length}</Text>
+                <Text className="text-blue-700 font-semibold text-sm">{person.totalDheetosCount}</Text>
               </View>
             </View>
           </View>
 
           {/* Empty State */}
-          {person.dheetos.length === 0 && (
+          {person.totalDheetosCount === 0 && (
             <View className="mx-4 bg-white rounded-2xl p-8 items-center border border-gray-100">
               <Package size={48} color="#9CA3AF" />
               <Text className="text-gray-900 font-semibold text-lg mt-3">No Dheetos Yet</Text>
@@ -190,12 +201,12 @@ export default function PersonDetailRoute() {
             </View>
           )}
 
-
           {/* Dheetos List */}
-          {person.dheetos.length > 0 && (
+          {person.totalDheetosCount > 0 && dheetos !== null && (
             <View className="mx-4 space-y-3">
-              {person.dheetos.map((dheeto) => (
-                <DheetoCard key={dheeto._id} dheeto={dheeto} onPress={() => goToIndividualDheetoPage(dheeto._id)} />
+              {/* TODO */}
+              {dheetos.map((dheeto) => (
+                <DheetoCard key={dheeto.id} dheeto={dheeto} person={person} onPress={() => goToIndividualDheetoPage(dheeto.id)} />
               ))}
             </View>
           )}
@@ -203,7 +214,7 @@ export default function PersonDetailRoute() {
           {/* Add Button */}
           <View className="mx-4 mt-4 mb-8">
             <TouchableOpacity
-              onPress={() => goToAddDheetoPage(person._id, person.name)}
+              onPress={() => goToAddDheetoPage(person.id, person.name)}
               className="bg-blue-600 rounded-2xl p-5 flex-row items-center justify-center shadow-sm active:bg-blue-700"
               activeOpacity={0.8}
             >

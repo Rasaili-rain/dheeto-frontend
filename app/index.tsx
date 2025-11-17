@@ -3,19 +3,22 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, RefreshControl } from "react-native";
 import { User, Plus, Filter } from "lucide-react-native";
 import { useRouter } from "expo-router";
-import { fetchAllPersons, searchPersons } from "@/lib/api/person";
-import { Person } from "@/lib/shared_types/db_types";
-import { GetAllPersonsResponse, SearchPersonResponse, SearchPersonQuery } from "@/lib/shared_types/person_types";
-import { PaginationMeta } from "@/lib/shared_types/types";
 import PersonCard from "@/lib/components/PersonCard";
 import PaginationControls from "@/lib/components/PaginationControls";
 import SearchModal from "@/lib/components/SearchModal";
 import Toast, { ToastType } from "@/lib/components/Toast";
+import { fetchAllPersons, searchPersons } from "@/lib/api/api_providers";
+import { Person, PaginationMeta, SearchPersonQuery, GetAllPersonsResponse, SearchPersonResponse } from "@/lib/types";
 
 export default function PersonListPage() {
   const router = useRouter();
   const goToAddPersonPage = () => router.push("/person/add-person");
-  const goToPersonDetailsPage = (personId: string) => router.push(`/person/${personId}`);
+  const goToPersonDetailsPage = (person: Person) =>
+    router.push({
+      pathname: "/person/[id]",
+      params: { id: person.id, person: JSON.stringify(person) },
+    });
+
   const [persons, setPersons] = useState<Person[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -32,8 +35,6 @@ export default function PersonListPage() {
   const [searchParams, setSearchParams] = useState<SearchPersonQuery>({
     name: "",
     phoneNo: "",
-    createdAfter: "",
-    createdBefore: "",
   });
   const [toast, setToast] = useState<{ show: boolean; message: string; type: ToastType }>({
     show: false,
@@ -49,7 +50,7 @@ export default function PersonListPage() {
   const loadPersons = async (page = 1) => {
     setLoading(true);
     try {
-      const response = (await fetchAllPersons({ page: page.toString(), limit: "50" })) as GetAllPersonsResponse;
+      const response = (await fetchAllPersons({ page: page, limit: 50 })) as GetAllPersonsResponse;
       if (!response.success) throw new Error(response.message || "Failed to load persons");
       setPersons(response.data);
       setPagination(response.pagination);
@@ -84,8 +85,6 @@ export default function PersonListPage() {
     setSearchParams({
       name: "",
       phoneNo: "",
-      createdAfter: "",
-      createdBefore: "",
     });
     setIsSearchActive(false);
     loadPersons();
@@ -150,7 +149,7 @@ export default function PersonListPage() {
             ) : (
               <View className="space-y-3">
                 {persons.map((person) => (
-                  <PersonCard key={person._id} person={person} onPress={() => goToPersonDetailsPage(person._id)} />
+                  <PersonCard key={person.id} person={person} onPress={() => goToPersonDetailsPage(person)} />
                 ))}
               </View>
             )}

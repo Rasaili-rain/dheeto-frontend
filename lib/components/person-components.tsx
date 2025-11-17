@@ -1,14 +1,14 @@
   import { ChevronRight, Clock, TrendingUp, TrendingDown, Package } from "lucide-react-native";
   import { TouchableOpacity, View, Text } from "react-native";
-  import { Dheeto } from "../shared_types/db_types";
+import { Dheeto, Person } from "../types";
 
-  export const DheetoCard = ({ dheeto, onPress }: { dheeto: Dheeto; onPress: () => void }) => {
-    const goldItems = dheeto.items.filter((item: { type: string }) => item.type === "gold").length;
-    const silverItems = dheeto.items.filter((item: { type: string }) => item.type === "silver").length;
+  export const DheetoCard = ({ dheeto, onPress }: { dheeto: Dheeto; person:Person ;onPress: () => void }) => {
+    // const goldItems = dheeto.items.filter((item: { type: string }) => item.type === "gold").length;
+    // const silverItems = dheeto.items.filter((item: { type: string }) => item.type === "silver").length;
 
-    const totalGave = dheeto.transactions.filter((t: { type: string }) => t.type === "gave").reduce((sum: any, t: { amount: any }) => sum + t.amount, 0);
-    const totalReceived = dheeto.transactions.filter((t: { type: string }) => t.type === "received").reduce((sum: any, t: { amount: any }) => sum + t.amount, 0);
-    const balance = totalReceived - totalGave;
+    // const totalGave = dheeto.transactions.filter((t: { type: string }) => t.type === "gave").reduce((sum: any, t: { amount: any }) => sum + t.amount, 0);
+    // const totalReceived = dheeto.transactions.filter((t: { type: string }) => t.type === "received").reduce((sum: any, t: { amount: any }) => sum + t.amount, 0);
+    const balance = dheeto.dheetoBalance;
     const isPositive = balance >= 0;
 
     return (

@@ -3,8 +3,8 @@ import React, { useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Alert } from "react-native";
 import { X, ChevronLeft } from "lucide-react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { createDheeto } from "@/lib/api/dheeto";
 import { CreateDheetoBody } from "@/lib/shared_types/dheeto_types";
+import { createDheeto } from "@/lib/api/api_providers";
 
 export default function AddDheetoPage() {
   const { personId, personName } = useLocalSearchParams<{ personId: string; personName: string }>();

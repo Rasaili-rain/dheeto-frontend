@@ -1,11 +1,10 @@
 // lib/components/dheeto-components.tsx
-import { updateItem, addItem, deleteItem } from "@/lib/api/item";
-import { updateTransaction, addTransaction, deleteTransaction } from "@/lib/api/transaction";
-import { X, Trash2, CheckCircle, RotateCcw } from "lucide-react-native";
+
+import { Trash2, X } from "lucide-react-native";
 import { useState } from "react";
-import { Modal, View, TouchableOpacity, Alert, ScrollView, TextInput, ActivityIndicator, Text, Switch } from "react-native";
-import { updateDheeto } from "@/lib/api/dheeto";
-import { Dheeto } from "@/lib/shared_types/db_types";
+import { Modal, View, TouchableOpacity, ScrollView, Alert, TextInput, Switch, ActivityIndicator , Text} from "react-native";
+import { updateItem, deleteItem, updateTransaction, deleteTransaction, addItem, addTransaction, updateDheeto } from "../api/api_providers";
+import { Dheeto } from "../shared_types/db_types";
 
 
 const BaseModal = ({ title, onClose, children, showDelete = false, onDelete}: any) => (

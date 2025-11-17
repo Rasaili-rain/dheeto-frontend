@@ -3,10 +3,10 @@ import { View, Text, TouchableOpacity, ScrollView, Alert, RefreshControl } from 
 import { ChevronLeft, Package, TrendingUp, Edit2 } from "lucide-react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState, useEffect } from "react";
-import { getDheetoById } from "@/lib/api/dheeto";
-import { Dheeto } from "@/lib/shared_types/db_types";
 import { EditItemModal, EditTransactionModal, AddItemModal, AddTransactionModal, EditDheetoModal } from "@/lib/components/dheeto-components";
 import { LoadingSpinner } from "@/lib/components/loading-spinner";
+import { getDheetoById } from "@/lib/api/api_providers";
+import { Dheeto } from "@/lib/types";
 
 export default function DheetoDetailPage() {
   const router = useRouter();

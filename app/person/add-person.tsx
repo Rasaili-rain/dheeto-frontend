@@ -2,10 +2,10 @@
 import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, TextInput } from "react-native";
 import { useRouter } from "expo-router";
 import { Phone, Plus, User, X } from "lucide-react-native";
-import { createPerson } from "@/lib/api/person";
 import Toast, { ToastType } from "@/lib/components/Toast";
-import { CreatePersonBody } from "@/lib/shared_types/person_types";
 import { useState } from "react";
+import { createPerson } from "@/lib/api/api_providers";
+import { CreatePersonBody } from "@/lib/types";
 
 export default function AddPersonModal() {
   const router = useRouter();

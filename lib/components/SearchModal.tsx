@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Modal } from "react-native";
 import { User, Phone, X, Search, Calendar } from "lucide-react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { SearchPersonQuery } from "@/lib/shared_types/person_types";
+import { SearchPersonQuery } from "../types";
 
 interface SearchModalProps {
   visible: boolean;
@@ -94,7 +94,7 @@ const SearchModal = ({ visible, onClose, searchParams, setSearchParams, onSearch
                     <TouchableOpacity onPress={() => openDatePicker("after")} className="flex-row items-center bg-teal-50 border-2 border-teal-200 rounded-xl px-4 py-3.5">
                       <Calendar size={20} color="#14B8A6" />
                       <Text className={`flex-1 ml-3 font-medium ${searchParams.createdAfter ? "text-gray-900" : "text-gray-400"}`}>
-                        {searchParams.createdAfter || "Select date..."}
+                        {searchParams.createdAfter?.toISOString() || "Select date..."}
                       </Text>
                       {searchParams.createdAfter && (
                         <TouchableOpacity onPress={() => clearDate("after")}>
@@ -110,7 +110,7 @@ const SearchModal = ({ visible, onClose, searchParams, setSearchParams, onSearch
                     <TouchableOpacity onPress={() => openDatePicker("before")} className="flex-row items-center bg-cyan-50 border-2 border-cyan-200 rounded-xl px-4 py-3.5">
                       <Calendar size={20} color="#06B6D4" />
                       <Text className={`flex-1 ml-3 font-medium ${searchParams.createdBefore ? "text-gray-900" : "text-gray-400"}`}>
-                        {searchParams.createdBefore || "Select date..."}
+                        {searchParams.createdBefore?.toDateString() || "Select date..."}
                       </Text>
                       {searchParams.createdBefore && (
                         <TouchableOpacity onPress={() => clearDate("before")}>

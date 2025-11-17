@@ -1,7 +1,9 @@
 import axios, { AxiosInstance } from "axios";
 
+
 export const api: AxiosInstance = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_SERVER_IP,
+  // baseURL: process.env.EXPO_PUBLIC_SERVER_IP,
+  baseURL: "http://192.168.254.243:3000",
   headers: { "Content-Type": "application/json" },
   timeout: 5000,
 });
@@ -13,3 +15,7 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+
+
+
